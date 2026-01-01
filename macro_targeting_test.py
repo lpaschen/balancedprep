@@ -68,13 +68,15 @@ class MacroTargetingTester:
 
     def setup_user_with_targets(self, calories: int, protein: int, preferences: list):
         """Create user with specific targets and preferences"""
+        import random
         timestamp = datetime.now().strftime("%H%M%S")
+        random_id = random.randint(1000, 9999)
         
         # Register user
         test_user = {
-            "email": f"macro_test_{timestamp}@example.com",
+            "email": f"macro_test_{timestamp}_{random_id}@example.com",
             "password": "TestPass123!",
-            "name": f"Macro Test User {timestamp}"
+            "name": f"Macro Test User {timestamp}_{random_id}"
         }
 
         success, response = self.make_request('POST', 'auth/register', test_user)
