@@ -485,7 +485,7 @@ async def generate_day_plan(
         on_target=on_target
     )
     
-    return day_plan, used_recipe_ids, current_unique
+    return day_plan, used_recipe_ids, current_unique, usage_count
 
 @api_router.post("/meal-plan/generate")
 async def generate_meal_plan(user: dict = Depends(get_current_user)):
