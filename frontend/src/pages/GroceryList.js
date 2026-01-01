@@ -11,12 +11,21 @@ const API = `${BACKEND_URL}/api`;
 
 const CATEGORY_ORDER = [
   'Produce',
+  'Proteins',
   'Meat',
   'Seafood',
-  'Dairy',
+  'Dairy & Eggs',
   'Bakery',
   'Deli',
-  'Pantry',
+  'Grains & Pasta',
+  'Legumes & Beans',
+  'Nuts & Seeds',
+  'Oils & Vinegars',
+  'Spices & Seasonings',
+  'Sauces & Condiments',
+  'Canned Goods',
+  'Frozen',
+  'Beverages',
   'Other',
 ];
 
