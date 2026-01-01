@@ -1446,6 +1446,228 @@ SEED_RECIPES = [
         "servings": 1,
         "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free", "paleo"],
         "image_url": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400"
+    },
+    # ============ MORE HIGH-PROTEIN VEGAN GF RECIPES ============
+    {
+        "name": "Seitan Stir-Fry",
+        "description": "High-protein seitan with Asian vegetables",
+        "meal_type": "dinner",
+        "calories": 420,
+        "protein": 45,
+        "carbs": 28,
+        "fat": 16,
+        "ingredients": [
+            {"name": "Seitan", "quantity": 8, "unit": "oz", "category": "Produce"},
+            {"name": "Bok Choy", "quantity": 2, "unit": "cups", "category": "Produce"},
+            {"name": "Tamari", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Sesame Oil", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Ginger", "quantity": 1, "unit": "tbsp", "category": "Produce"}
+        ],
+        "instructions": ["Slice seitan", "Stir-fry with vegetables", "Add tamari and ginger", "Serve hot"],
+        "prep_time": 10,
+        "cook_time": 15,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400"
+    },
+    {
+        "name": "TVP Taco Filling",
+        "description": "Textured vegetable protein with Mexican spices",
+        "meal_type": "dinner",
+        "calories": 380,
+        "protein": 42,
+        "carbs": 35,
+        "fat": 8,
+        "ingredients": [
+            {"name": "TVP", "quantity": 1.5, "unit": "cups", "category": "Pantry"},
+            {"name": "Taco Seasoning", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Corn Tortillas", "quantity": 3, "unit": "small", "category": "Bakery"},
+            {"name": "Salsa", "quantity": 0.5, "unit": "cup", "category": "Pantry"},
+            {"name": "Lettuce", "quantity": 1, "unit": "cup", "category": "Produce"}
+        ],
+        "instructions": ["Rehydrate TVP in hot water", "Season with taco spices", "Serve in corn tortillas with toppings"],
+        "prep_time": 10,
+        "cook_time": 10,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400"
+    },
+    {
+        "name": "Protein-Packed Overnight Oats",
+        "description": "GF oats with protein powder and seeds",
+        "meal_type": "breakfast",
+        "calories": 450,
+        "protein": 32,
+        "carbs": 52,
+        "fat": 14,
+        "ingredients": [
+            {"name": "GF Rolled Oats", "quantity": 0.75, "unit": "cup", "category": "Pantry"},
+            {"name": "Pea Protein Powder", "quantity": 1.5, "unit": "scoops", "category": "Pantry"},
+            {"name": "Hemp Hearts", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Almond Milk", "quantity": 1, "unit": "cup", "category": "Dairy"},
+            {"name": "Chia Seeds", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Mix all ingredients", "Refrigerate overnight", "Top with berries if desired"],
+        "prep_time": 5,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=400"
+    },
+    {
+        "name": "Tempeh Bacon Bowl",
+        "description": "Crispy tempeh bacon with hash browns and veggies",
+        "meal_type": "breakfast",
+        "calories": 480,
+        "protein": 35,
+        "carbs": 38,
+        "fat": 24,
+        "ingredients": [
+            {"name": "Tempeh", "quantity": 8, "unit": "oz", "category": "Produce"},
+            {"name": "Potatoes", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Tamari", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Maple Syrup", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Spinach", "quantity": 2, "unit": "cups", "category": "Produce"}
+        ],
+        "instructions": ["Slice tempeh thin and marinate in tamari/maple", "Shred and fry potatoes", "Pan-fry tempeh until crispy", "Serve together with sautéed spinach"],
+        "prep_time": 15,
+        "cook_time": 20,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400"
+    },
+    {
+        "name": "High-Protein Lentil Salad",
+        "description": "French lentils with vegetables and lemon dressing",
+        "meal_type": "lunch",
+        "calories": 420,
+        "protein": 28,
+        "carbs": 52,
+        "fat": 12,
+        "ingredients": [
+            {"name": "French Lentils", "quantity": 1.5, "unit": "cups", "category": "Pantry"},
+            {"name": "Cherry Tomatoes", "quantity": 1, "unit": "cup", "category": "Produce"},
+            {"name": "Cucumber", "quantity": 1, "unit": "whole", "category": "Produce"},
+            {"name": "Lemon Juice", "quantity": 2, "unit": "tbsp", "category": "Produce"},
+            {"name": "Olive Oil", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Parsley", "quantity": 0.5, "unit": "cup", "category": "Produce"}
+        ],
+        "instructions": ["Cook lentils until tender", "Chop vegetables", "Mix dressing", "Combine all and chill"],
+        "prep_time": 10,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
+    },
+    {
+        "name": "Chickpea Protein Bowl",
+        "description": "Roasted chickpeas with quinoa and tahini",
+        "meal_type": "lunch",
+        "calories": 520,
+        "protein": 26,
+        "carbs": 62,
+        "fat": 20,
+        "ingredients": [
+            {"name": "Chickpeas", "quantity": 1.5, "unit": "cups", "category": "Pantry"},
+            {"name": "Quinoa", "quantity": 0.75, "unit": "cup", "category": "Pantry"},
+            {"name": "Tahini", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Roasted Red Peppers", "quantity": 0.5, "unit": "cup", "category": "Produce"},
+            {"name": "Spinach", "quantity": 2, "unit": "cups", "category": "Produce"}
+        ],
+        "instructions": ["Cook quinoa", "Roast seasoned chickpeas", "Assemble bowl", "Drizzle with tahini"],
+        "prep_time": 10,
+        "cook_time": 30,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400"
+    },
+    {
+        "name": "Spicy Peanut Tofu",
+        "description": "Crispy tofu in spicy peanut sauce",
+        "meal_type": "dinner",
+        "calories": 520,
+        "protein": 38,
+        "carbs": 32,
+        "fat": 30,
+        "ingredients": [
+            {"name": "Extra Firm Tofu", "quantity": 16, "unit": "oz", "category": "Produce"},
+            {"name": "Peanut Butter", "quantity": 3, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Tamari", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Sriracha", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Brown Rice", "quantity": 0.5, "unit": "cup", "category": "Pantry"},
+            {"name": "Broccoli", "quantity": 2, "unit": "cups", "category": "Produce"}
+        ],
+        "instructions": ["Press and cube tofu", "Pan-fry until crispy", "Make peanut sauce", "Toss tofu in sauce", "Serve with rice and broccoli"],
+        "prep_time": 15,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400"
+    },
+    {
+        "name": "Black Bean Soup",
+        "description": "Hearty black bean soup with cumin and lime",
+        "meal_type": "dinner",
+        "calories": 380,
+        "protein": 24,
+        "carbs": 58,
+        "fat": 6,
+        "ingredients": [
+            {"name": "Black Beans", "quantity": 2, "unit": "cups", "category": "Pantry"},
+            {"name": "Vegetable Broth", "quantity": 2, "unit": "cups", "category": "Pantry"},
+            {"name": "Onion", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Cumin", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Lime", "quantity": 1, "unit": "whole", "category": "Produce"},
+            {"name": "Avocado", "quantity": 0.5, "unit": "whole", "category": "Produce"}
+        ],
+        "instructions": ["Sauté onion", "Add beans, broth, and cumin", "Simmer 20 minutes", "Blend partially", "Serve with lime and avocado"],
+        "prep_time": 10,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400"
+    },
+    {
+        "name": "Pea Protein Shake",
+        "description": "Quick high-protein shake with banana and spinach",
+        "meal_type": "snack",
+        "calories": 280,
+        "protein": 30,
+        "carbs": 28,
+        "fat": 6,
+        "ingredients": [
+            {"name": "Pea Protein Powder", "quantity": 1.5, "unit": "scoops", "category": "Pantry"},
+            {"name": "Banana", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Spinach", "quantity": 1, "unit": "cup", "category": "Produce"},
+            {"name": "Almond Milk", "quantity": 1, "unit": "cup", "category": "Dairy"}
+        ],
+        "instructions": ["Blend all ingredients until smooth"],
+        "prep_time": 3,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400"
+    },
+    {
+        "name": "Lupini Bean Salad",
+        "description": "Mediterranean lupini beans with herbs",
+        "meal_type": "snack",
+        "calories": 200,
+        "protein": 26,
+        "carbs": 16,
+        "fat": 4,
+        "ingredients": [
+            {"name": "Lupini Beans", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "Lemon Juice", "quantity": 1, "unit": "tbsp", "category": "Produce"},
+            {"name": "Garlic", "quantity": 1, "unit": "clove", "category": "Produce"},
+            {"name": "Parsley", "quantity": 2, "unit": "tbsp", "category": "Produce"}
+        ],
+        "instructions": ["Drain and rinse lupini beans", "Toss with lemon, garlic, and parsley"],
+        "prep_time": 5,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=400"
     }
 ]
 
