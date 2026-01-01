@@ -1103,6 +1103,344 @@ SEED_RECIPES = [
         "servings": 1,
         "tags": ["vegetarian", "gluten-free"],
         "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400"
+    },
+    # ============ VEGAN + GLUTEN-FREE HIGH PROTEIN RECIPES ============
+    # Breakfast - Vegan GF
+    {
+        "name": "High-Protein Tofu Scramble",
+        "description": "Savory scrambled tofu with vegetables and nutritional yeast",
+        "meal_type": "breakfast",
+        "calories": 380,
+        "protein": 28,
+        "carbs": 18,
+        "fat": 22,
+        "ingredients": [
+            {"name": "Extra Firm Tofu", "quantity": 14, "unit": "oz", "category": "Produce"},
+            {"name": "Nutritional Yeast", "quantity": 3, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Turmeric", "quantity": 0.5, "unit": "tsp", "category": "Pantry"},
+            {"name": "Spinach", "quantity": 2, "unit": "cups", "category": "Produce"},
+            {"name": "Bell Pepper", "quantity": 0.5, "unit": "whole", "category": "Produce"},
+            {"name": "Olive Oil", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Press and crumble tofu", "Sauté vegetables", "Add tofu with turmeric and nutritional yeast", "Cook until golden"],
+        "prep_time": 10,
+        "cook_time": 15,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400"
+    },
+    {
+        "name": "Protein Smoothie Bowl",
+        "description": "Thick smoothie bowl topped with seeds and hemp hearts",
+        "meal_type": "breakfast",
+        "calories": 420,
+        "protein": 25,
+        "carbs": 48,
+        "fat": 16,
+        "ingredients": [
+            {"name": "Frozen Banana", "quantity": 1, "unit": "whole", "category": "Produce"},
+            {"name": "Pea Protein Powder", "quantity": 1, "unit": "scoop", "category": "Pantry"},
+            {"name": "Hemp Hearts", "quantity": 3, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Almond Milk", "quantity": 0.5, "unit": "cup", "category": "Dairy"},
+            {"name": "Peanut Butter", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Chia Seeds", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Blend banana, protein, almond milk, and peanut butter", "Pour into bowl", "Top with hemp hearts and chia seeds"],
+        "prep_time": 5,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400"
+    },
+    {
+        "name": "Chickpea Flour Pancakes",
+        "description": "Savory high-protein pancakes made with chickpea flour",
+        "meal_type": "breakfast",
+        "calories": 350,
+        "protein": 18,
+        "carbs": 42,
+        "fat": 12,
+        "ingredients": [
+            {"name": "Chickpea Flour", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "Water", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "Cumin", "quantity": 0.5, "unit": "tsp", "category": "Pantry"},
+            {"name": "Onion", "quantity": 0.25, "unit": "whole", "category": "Produce"},
+            {"name": "Olive Oil", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Mix chickpea flour with water and spices", "Let rest 10 minutes", "Cook like pancakes in oiled pan"],
+        "prep_time": 15,
+        "cook_time": 10,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400"
+    },
+    # Lunch - Vegan GF High Protein
+    {
+        "name": "Tempeh Buddha Bowl",
+        "description": "Marinated tempeh with quinoa and roasted vegetables",
+        "meal_type": "lunch",
+        "calories": 550,
+        "protein": 32,
+        "carbs": 52,
+        "fat": 24,
+        "ingredients": [
+            {"name": "Tempeh", "quantity": 6, "unit": "oz", "category": "Produce"},
+            {"name": "Quinoa", "quantity": 0.75, "unit": "cup", "category": "Pantry"},
+            {"name": "Broccoli", "quantity": 1.5, "unit": "cups", "category": "Produce"},
+            {"name": "Tahini", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Tamari", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Maple Syrup", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Marinate tempeh in tamari and maple syrup", "Cook quinoa", "Roast broccoli", "Pan-fry tempeh", "Assemble with tahini drizzle"],
+        "prep_time": 15,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400"
+    },
+    {
+        "name": "Lentil Soup",
+        "description": "Hearty red lentil soup with warming spices",
+        "meal_type": "lunch",
+        "calories": 420,
+        "protein": 24,
+        "carbs": 58,
+        "fat": 10,
+        "ingredients": [
+            {"name": "Red Lentils", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "Vegetable Broth", "quantity": 3, "unit": "cups", "category": "Pantry"},
+            {"name": "Onion", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Carrots", "quantity": 2, "unit": "medium", "category": "Produce"},
+            {"name": "Cumin", "quantity": 1, "unit": "tsp", "category": "Pantry"},
+            {"name": "Garlic", "quantity": 3, "unit": "cloves", "category": "Produce"}
+        ],
+        "instructions": ["Sauté onion and garlic", "Add carrots and spices", "Add lentils and broth", "Simmer 25 minutes until lentils are soft"],
+        "prep_time": 10,
+        "cook_time": 30,
+        "servings": 2,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400"
+    },
+    {
+        "name": "Black Bean Taco Bowl",
+        "description": "Spiced black beans over rice with fresh vegetables",
+        "meal_type": "lunch",
+        "calories": 480,
+        "protein": 22,
+        "carbs": 72,
+        "fat": 12,
+        "ingredients": [
+            {"name": "Black Beans", "quantity": 1.5, "unit": "cups", "category": "Pantry"},
+            {"name": "Brown Rice", "quantity": 0.75, "unit": "cup", "category": "Pantry"},
+            {"name": "Avocado", "quantity": 0.5, "unit": "whole", "category": "Produce"},
+            {"name": "Salsa", "quantity": 0.5, "unit": "cup", "category": "Pantry"},
+            {"name": "Lime", "quantity": 1, "unit": "whole", "category": "Produce"},
+            {"name": "Cumin", "quantity": 1, "unit": "tsp", "category": "Pantry"}
+        ],
+        "instructions": ["Cook rice", "Heat black beans with cumin", "Assemble bowl with beans, rice, avocado, and salsa", "Squeeze lime on top"],
+        "prep_time": 10,
+        "cook_time": 20,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=400"
+    },
+    {
+        "name": "Edamame Salad",
+        "description": "Protein-packed edamame salad with sesame dressing",
+        "meal_type": "lunch",
+        "calories": 380,
+        "protein": 26,
+        "carbs": 28,
+        "fat": 20,
+        "ingredients": [
+            {"name": "Edamame", "quantity": 1.5, "unit": "cups", "category": "Produce"},
+            {"name": "Cucumber", "quantity": 1, "unit": "whole", "category": "Produce"},
+            {"name": "Red Cabbage", "quantity": 1, "unit": "cup", "category": "Produce"},
+            {"name": "Sesame Oil", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Rice Vinegar", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Sesame Seeds", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Cook edamame and let cool", "Chop vegetables", "Mix dressing", "Toss everything together"],
+        "prep_time": 10,
+        "cook_time": 5,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"
+    },
+    # Dinner - Vegan GF High Protein
+    {
+        "name": "Tofu Stir-Fry",
+        "description": "Crispy tofu with vegetables in a savory sauce",
+        "meal_type": "dinner",
+        "calories": 480,
+        "protein": 30,
+        "carbs": 38,
+        "fat": 24,
+        "ingredients": [
+            {"name": "Extra Firm Tofu", "quantity": 14, "unit": "oz", "category": "Produce"},
+            {"name": "Broccoli", "quantity": 2, "unit": "cups", "category": "Produce"},
+            {"name": "Bell Peppers", "quantity": 1, "unit": "cup", "category": "Produce"},
+            {"name": "Tamari", "quantity": 3, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Sesame Oil", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Garlic", "quantity": 3, "unit": "cloves", "category": "Produce"},
+            {"name": "Brown Rice", "quantity": 0.5, "unit": "cup", "category": "Pantry"}
+        ],
+        "instructions": ["Press and cube tofu", "Pan-fry tofu until crispy", "Stir-fry vegetables", "Add sauce and combine", "Serve over rice"],
+        "prep_time": 15,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400"
+    },
+    {
+        "name": "Chickpea Coconut Curry",
+        "description": "Creamy coconut curry with chickpeas and spinach",
+        "meal_type": "dinner",
+        "calories": 520,
+        "protein": 20,
+        "carbs": 58,
+        "fat": 24,
+        "ingredients": [
+            {"name": "Chickpeas", "quantity": 1.5, "unit": "cups", "category": "Pantry"},
+            {"name": "Coconut Milk", "quantity": 1, "unit": "can", "category": "Pantry"},
+            {"name": "Spinach", "quantity": 3, "unit": "cups", "category": "Produce"},
+            {"name": "Curry Powder", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Onion", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Basmati Rice", "quantity": 0.75, "unit": "cup", "category": "Pantry"}
+        ],
+        "instructions": ["Sauté onion", "Add curry powder", "Add coconut milk and chickpeas", "Simmer 15 minutes", "Stir in spinach", "Serve over rice"],
+        "prep_time": 10,
+        "cook_time": 25,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=400"
+    },
+    {
+        "name": "Stuffed Bell Peppers",
+        "description": "Bell peppers stuffed with quinoa, black beans, and corn",
+        "meal_type": "dinner",
+        "calories": 440,
+        "protein": 18,
+        "carbs": 62,
+        "fat": 14,
+        "ingredients": [
+            {"name": "Bell Peppers", "quantity": 2, "unit": "large", "category": "Produce"},
+            {"name": "Quinoa", "quantity": 0.5, "unit": "cup", "category": "Pantry"},
+            {"name": "Black Beans", "quantity": 0.75, "unit": "cup", "category": "Pantry"},
+            {"name": "Corn", "quantity": 0.5, "unit": "cup", "category": "Produce"},
+            {"name": "Salsa", "quantity": 0.5, "unit": "cup", "category": "Pantry"},
+            {"name": "Cumin", "quantity": 1, "unit": "tsp", "category": "Pantry"}
+        ],
+        "instructions": ["Cook quinoa", "Mix with beans, corn, salsa, and cumin", "Stuff peppers", "Bake at 375°F for 30 minutes"],
+        "prep_time": 15,
+        "cook_time": 35,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400"
+    },
+    {
+        "name": "Lentil Bolognese",
+        "description": "Hearty lentil pasta sauce over gluten-free pasta",
+        "meal_type": "dinner",
+        "calories": 490,
+        "protein": 26,
+        "carbs": 72,
+        "fat": 10,
+        "ingredients": [
+            {"name": "Brown Lentils", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "GF Pasta", "quantity": 4, "unit": "oz", "category": "Pantry"},
+            {"name": "Crushed Tomatoes", "quantity": 1, "unit": "can", "category": "Pantry"},
+            {"name": "Onion", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Garlic", "quantity": 3, "unit": "cloves", "category": "Produce"},
+            {"name": "Italian Herbs", "quantity": 1, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Cook lentils until tender", "Sauté onion and garlic", "Add tomatoes and herbs", "Simmer with lentils 20 minutes", "Serve over GF pasta"],
+        "prep_time": 10,
+        "cook_time": 40,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1598866594230-a7c12756260f?w=400"
+    },
+    # Snacks - Vegan GF High Protein
+    {
+        "name": "Roasted Chickpeas",
+        "description": "Crunchy spiced roasted chickpeas",
+        "meal_type": "snack",
+        "calories": 200,
+        "protein": 10,
+        "carbs": 28,
+        "fat": 6,
+        "ingredients": [
+            {"name": "Chickpeas", "quantity": 1, "unit": "cup", "category": "Pantry"},
+            {"name": "Olive Oil", "quantity": 1, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Paprika", "quantity": 1, "unit": "tsp", "category": "Pantry"},
+            {"name": "Garlic Powder", "quantity": 0.5, "unit": "tsp", "category": "Pantry"}
+        ],
+        "instructions": ["Dry chickpeas well", "Toss with oil and spices", "Roast at 400°F for 30 minutes until crispy"],
+        "prep_time": 5,
+        "cook_time": 30,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=400"
+    },
+    {
+        "name": "Edamame",
+        "description": "Steamed edamame with sea salt",
+        "meal_type": "snack",
+        "calories": 180,
+        "protein": 17,
+        "carbs": 14,
+        "fat": 8,
+        "ingredients": [
+            {"name": "Edamame in Pods", "quantity": 1.5, "unit": "cups", "category": "Produce"},
+            {"name": "Sea Salt", "quantity": 0.5, "unit": "tsp", "category": "Pantry"}
+        ],
+        "instructions": ["Steam or boil edamame 5 minutes", "Drain and sprinkle with salt"],
+        "prep_time": 2,
+        "cook_time": 5,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1564894809611-1742fc40ed80?w=400"
+    },
+    {
+        "name": "Trail Mix",
+        "description": "Homemade high-protein trail mix with seeds and nuts",
+        "meal_type": "snack",
+        "calories": 280,
+        "protein": 12,
+        "carbs": 20,
+        "fat": 20,
+        "ingredients": [
+            {"name": "Almonds", "quantity": 0.25, "unit": "cup", "category": "Pantry"},
+            {"name": "Pumpkin Seeds", "quantity": 0.25, "unit": "cup", "category": "Pantry"},
+            {"name": "Sunflower Seeds", "quantity": 2, "unit": "tbsp", "category": "Pantry"},
+            {"name": "Dried Cranberries", "quantity": 2, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Mix all ingredients together"],
+        "prep_time": 2,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free"],
+        "image_url": "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=400"
+    },
+    {
+        "name": "Nut Butter Banana Bites",
+        "description": "Banana slices with almond butter",
+        "meal_type": "snack",
+        "calories": 220,
+        "protein": 8,
+        "carbs": 28,
+        "fat": 12,
+        "ingredients": [
+            {"name": "Banana", "quantity": 1, "unit": "medium", "category": "Produce"},
+            {"name": "Almond Butter", "quantity": 2, "unit": "tbsp", "category": "Pantry"}
+        ],
+        "instructions": ["Slice banana into rounds", "Top each with almond butter"],
+        "prep_time": 3,
+        "cook_time": 0,
+        "servings": 1,
+        "tags": ["vegan", "vegetarian", "gluten-free", "dairy-free", "paleo"],
+        "image_url": "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400"
     }
 ]
 
