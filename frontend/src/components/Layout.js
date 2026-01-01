@@ -6,7 +6,8 @@ import {
   BookOpen, 
   User, 
   LogOut,
-  Leaf
+  Leaf,
+  ChefHat
 } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -21,6 +22,7 @@ const Layout = ({ children }) => {
 
   const navItems = [
     { to: '/dashboard', icon: CalendarDays, label: 'Plan' },
+    { to: '/meal-prep', icon: ChefHat, label: 'Meal Prep' },
     { to: '/grocery', icon: ShoppingCart, label: 'Grocery' },
     { to: '/recipes', icon: BookOpen, label: 'Recipes' },
     { to: '/profile', icon: User, label: 'Profile' },
@@ -32,14 +34,16 @@ const Layout = ({ children }) => {
       <header className="hidden md:block sticky top-0 z-40 glass border-b border-border">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <NavLink to="/dashboard" className="flex items-center gap-2">
+            {/* Logo - Left */}
+            <NavLink to="/dashboard" className="flex items-center gap-2 flex-shrink-0">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-primary-foreground" strokeWidth={1.5} />
               </div>
               <span className="text-xl font-semibold tracking-tight">BalancedPrep</span>
             </NavLink>
             
-            <nav className="flex items-center gap-1">
+            {/* Nav - Left aligned after logo with gap */}
+            <nav className="flex items-center gap-1 ml-12 flex-1">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -58,7 +62,8 @@ const Layout = ({ children }) => {
               ))}
             </nav>
 
-            <div className="flex items-center gap-4">
+            {/* User info - Right */}
+            <div className="flex items-center gap-4 flex-shrink-0">
               <span className="text-sm text-muted-foreground">{user?.name}</span>
               <Button
                 variant="ghost"
@@ -110,7 +115,7 @@ const Layout = ({ children }) => {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors duration-200 ${
+                `flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors duration-200 ${
                   isActive
                     ? 'text-primary'
                     : 'text-muted-foreground'
@@ -118,7 +123,7 @@ const Layout = ({ children }) => {
               }
             >
               <item.icon className="w-5 h-5" strokeWidth={1.5} />
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </NavLink>
           ))}
         </div>
