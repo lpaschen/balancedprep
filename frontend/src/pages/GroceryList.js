@@ -196,17 +196,6 @@ const GroceryList = () => {
           </Card>
         ))}
       </div>
-
-      {/* Image */}
-      {progress < 100 && (
-        <div className="flex justify-center pt-8">
-          <img
-            src="https://images.unsplash.com/photo-1617500603321-bcd6286973b7?w=400&q=80"
-            alt="Fresh groceries"
-            className="w-32 h-32 rounded-full object-cover opacity-50"
-          />
-        </div>
-      )}
     </div>
   );
 };
