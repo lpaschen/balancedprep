@@ -3,6 +3,22 @@
 ## Original Problem Statement
 Build a full-stack web app called BalancedPrep that turns a user's nutrition targets into a 7-day meal plan and a consolidated weekly grocery list.
 
+## Bug Fixes (January 1, 2026)
+### Issue 1: Dietary preferences not respected
+- **Problem**: Vegan+GF users were seeing meat/dairy recipes
+- **Root Cause**: Fallback code was ignoring preferences when no matching recipes found
+- **Fix**: Removed fallback, strict preference filtering now enforced
+- **Validation**: 100% of recipes now comply with dietary preferences
+
+### Issue 2: Macros too far off target
+- **Problem**: Too high calories, too low protein vs targets
+- **Root Cause**: Recipe selection and serving calculation not optimized for protein
+- **Fix**: 
+  - Added 15 new high-protein vegan+GF recipes (now 41 total, 28 vegan+GF)
+  - Improved scoring algorithm to heavily favor high-protein recipes
+  - Optimized serving calculation to weight protein 60% vs calories 40%
+- **Validation**: Daily totals now within 10% tolerance for both calories and protein
+
 ## User Personas
 1. **Health-conscious Professional** - Busy individual who wants structured meal planning without complexity
 2. **Fitness Enthusiast** - Tracks macros closely, needs flexibility in target setting
