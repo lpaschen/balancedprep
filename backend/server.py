@@ -566,17 +566,22 @@ async def swap_meal(request: SwapMealRequest, user: dict = Depends(get_current_u
     # Get current recipe IDs to exclude
     current_ids = {old_meal["recipe_id"]}
     
-    # Find alternative recipe
+    # Find alternative recipe - MUST respect dietary preferences
+    preferences = user.get("preferences", [])
     query = {"meal_type": meal_type, "id": {"$ne": old_meal["recipe_id"]}}
+    
+    # STRICT dietary preference filtering
     if preferences:
         query["tags"] = {"$all": preferences}
     
     recipes = await db.recipes.find(query, {"_id": 0}).to_list(50)
-    if not recipes:
-        recipes = await db.recipes.find({"meal_type": meal_type, "id": {"$ne": old_meal["recipe_id"]}}, {"_id": 0}).to_list(50)
     
+    # NO FALLBACK - if no matching recipes, return error
     if not recipes:
-        raise HTTPException(status_code=400, detail="No alternative recipes available")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"No alternative {meal_type} recipes available matching your dietary preferences ({', '.join(preferences)})"
+        )
     
     new_recipe = random.choice(recipes)
     serving = 1.0
