@@ -369,30 +369,25 @@ async def select_recipe_for_meal(
     recipes.sort(key=score_recipe, reverse=True)
     selected = recipes[0]
     
-    # Determine serving multiplier - optimize for BOTH calories and protein
+    # Determine serving multiplier to hit targets
     serving = 1.0
     
-    # Calculate ideal serving based on targets
-    # Main meals: ~30% each (90% total), Snack: ~10%
-    ideal_servings = []
-    meal_frac = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
+    # Target macros for this meal
+    target_cal = (targets.get("calories") or 2000) * meal_fraction
+    target_prot = (targets.get("protein") or 100) * meal_fraction
     
-    if targets.get("calories") and targets["calories"] > 0 and selected["calories"] > 0:
-        target_cal = targets["calories"] * meal_frac
-        ideal_servings.append(target_cal / selected["calories"])
+    # Calculate ideal servings for each target
+    ideal_cal_serving = target_cal / selected["calories"] if selected["calories"] > 0 else 1.0
+    ideal_prot_serving = target_prot / selected["protein"] if selected["protein"] > 0 else 1.0
     
-    if targets.get("protein") and targets["protein"] > 0 and selected["protein"] > 0:
-        target_prot = targets["protein"] * meal_frac
-        ideal_servings.append(target_prot / selected["protein"])
+    # Weight protein more (60%) to ensure protein targets are hit
+    if targets.get("protein") and targets["protein"] > 0:
+        avg_serving = ideal_cal_serving * 0.4 + ideal_prot_serving * 0.6
+    else:
+        avg_serving = ideal_cal_serving
     
-    if ideal_servings:
-        # For protein-focused plans, weight protein more (60%)
-        if len(ideal_servings) >= 2:
-            avg_serving = ideal_servings[0] * 0.4 + ideal_servings[1] * 0.6
-        else:
-            avg_serving = ideal_servings[0]
-        # Round to nearest 0.25 and allow range from 0.75 to 2.0
-        serving = max(0.75, min(2.0, round(avg_serving * 4) / 4))
+    # Round to nearest 0.25, allow 0.75 to 2.0 range
+    serving = max(0.75, min(2.0, round(avg_serving * 4) / 4))
     
     return selected, serving
 
