@@ -309,39 +309,43 @@ async def select_recipe_for_meal(
     used_recipe_ids: set,
     max_unique: int,
     current_unique: int,
-    day_running_totals: Dict[str, float] = None
+    day_running_totals: Dict[str, float] = None,
+    recipe_usage_count: Dict[str, int] = None
 ) -> Optional[tuple]:
     """Select a recipe that fits preferences and targets."""
     query = {"meal_type": meal_type}
     
     # STRICT dietary preference filtering - never ignore these
-    # Vegan/vegetarian are mutually exclusive diet types that must be respected
     strict_prefs = [p for p in preferences if p in ['vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'nut-free', 'keto', 'paleo', 'low-sodium']]
     
     if strict_prefs:
-        # All strict preferences must be matched
         query["tags"] = {"$all": strict_prefs}
     
     recipes = await db.recipes.find(query, {"_id": 0}).to_list(100)
     
-    # NO FALLBACK - if no recipes match preferences, return None
     if not recipes:
         logger.warning(f"No recipes found for {meal_type} matching preferences: {strict_prefs}")
         return None
     
-    # VARIETY LOGIC: Separate unused and used recipes
+    usage_count = recipe_usage_count or {}
+    
+    # VARIETY LOGIC with minimum 2x usage guarantee:
+    # 1. First, find recipes used exactly once (need to use again for 2x minimum)
+    # 2. Then unused recipes (if we haven't hit max_unique)
+    # 3. Finally, any used recipe
+    
+    once_used_recipes = [r for r in recipes if usage_count.get(r["id"], 0) == 1]
     unused_recipes = [r for r in recipes if r["id"] not in used_recipe_ids]
     used_recipes_list = [r for r in recipes if r["id"] in used_recipe_ids]
     
-    # Determine which pool to pick from based on variety constraints
-    if current_unique < max_unique and unused_recipes:
-        # We haven't hit max unique yet AND we have unused recipes - use only unused
+    # Prioritize recipes that need a second use
+    if once_used_recipes:
+        candidate_recipes = once_used_recipes
+    elif current_unique < max_unique and unused_recipes:
         candidate_recipes = unused_recipes
     elif used_recipes_list:
-        # We've hit max unique OR no unused left - can reuse
         candidate_recipes = used_recipes_list
     else:
-        # Fallback to all recipes
         candidate_recipes = recipes
     
     # Calculate what we still need to hit targets
