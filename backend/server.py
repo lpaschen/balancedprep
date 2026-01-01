@@ -325,16 +325,24 @@ async def select_recipe_for_meal(
     recipes = await db.recipes.find(query, {"_id": 0}).to_list(100)
     
     # NO FALLBACK - if no recipes match preferences, return None
-    # The caller should handle this by notifying the user
     if not recipes:
         logger.warning(f"No recipes found for {meal_type} matching preferences: {strict_prefs}")
         return None
     
-    # If we've hit max unique, prefer already used recipes
-    if current_unique >= max_unique and used_recipe_ids:
-        used_recipes = [r for r in recipes if r["id"] in used_recipe_ids]
-        if used_recipes:
-            recipes = used_recipes
+    # VARIETY LOGIC: Separate unused and used recipes
+    unused_recipes = [r for r in recipes if r["id"] not in used_recipe_ids]
+    used_recipes_list = [r for r in recipes if r["id"] in used_recipe_ids]
+    
+    # Determine which pool to pick from based on variety constraints
+    if current_unique < max_unique and unused_recipes:
+        # We haven't hit max unique yet AND we have unused recipes - use only unused
+        candidate_recipes = unused_recipes
+    elif used_recipes_list:
+        # We've hit max unique OR no unused left - can reuse
+        candidate_recipes = used_recipes_list
+    else:
+        # Fallback to all recipes
+        candidate_recipes = recipes
     
     # Calculate what we still need to hit targets
     day_totals = day_running_totals or {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
@@ -362,12 +370,12 @@ async def select_recipe_for_meal(
             cal_diff_pct = abs(recipe["calories"] - target_cal) / target_cal
             score -= cal_diff_pct * 10  # Small penalty for calorie mismatch
         
-        # Small randomness to avoid exact same picks
-        score += random.uniform(-3, 3)
+        # Add MORE randomness to create variety within the pool
+        score += random.uniform(-15, 15)
         return score
     
-    recipes.sort(key=score_recipe, reverse=True)
-    selected = recipes[0]
+    candidate_recipes.sort(key=score_recipe, reverse=True)
+    selected = candidate_recipes[0]
     
     # Determine serving multiplier to hit targets
     serving = 1.0
