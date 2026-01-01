@@ -410,11 +410,13 @@ async def generate_day_plan(
     preferences: List[str],
     used_recipe_ids: set,
     max_unique: int,
-    current_unique: int
+    current_unique: int,
+    recipe_usage_count: Dict[str, int] = None
 ) -> tuple:
     """Generate a single day's meal plan."""
     meals = []
     meal_types = ["breakfast", "lunch", "dinner", "snack"]
+    usage_count = recipe_usage_count or {}
     
     # Track running totals to optimize each meal selection
     day_running_totals = {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
@@ -422,13 +424,16 @@ async def generate_day_plan(
     for meal_type in meal_types:
         result = await select_recipe_for_meal(
             meal_type, targets, preferences, used_recipe_ids, max_unique, current_unique,
-            day_running_totals
+            day_running_totals, usage_count
         )
         if result:
             recipe, serving = result
             if recipe["id"] not in used_recipe_ids:
                 current_unique += 1
             used_recipe_ids.add(recipe["id"])
+            
+            # Track usage count
+            usage_count[recipe["id"]] = usage_count.get(recipe["id"], 0) + 1
             
             meals.append(MealSlot(
                 meal_type=meal_type,
