@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
+import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
@@ -24,6 +25,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const Dashboard = () => {
@@ -200,32 +202,40 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Day Selector */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {mealPlan.days.map((day, index) => {
-          const allOnTarget = Object.values(day.on_target).every((v) => v);
-          return (
-            <button
-              key={day.day}
-              onClick={() => setSelectedDay(index)}
-              className={`flex-shrink-0 px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-                selectedDay === index
-                  ? 'border-primary bg-accent'
-                  : 'border-border hover:border-primary/30'
-              }`}
-              data-testid={`day-selector-${index}`}
-            >
-              <div className="text-sm font-medium">{DAYS_SHORT[index]}</div>
-              <div className="flex items-center gap-1 mt-1">
-                {allOnTarget ? (
-                  <Check className="w-3.5 h-3.5 text-primary" />
-                ) : (
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+      {/* Day Selector - Full Width Tabs */}
+      <div className="w-full">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 bg-secondary/50 rounded-2xl">
+          {mealPlan.days.map((day, index) => {
+            const allOnTarget = Object.values(day.on_target).every((v) => v);
+            const isSelected = selectedDay === index;
+            return (
+              <button
+                key={day.day}
+                onClick={() => setSelectedDay(index)}
+                className={`relative flex flex-col items-center py-3 sm:py-4 rounded-xl transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-card shadow-sm'
+                    : 'hover:bg-card/50'
+                }`}
+                data-testid={`day-selector-${index}`}
+              >
+                <span className={`text-xs sm:text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {DAYS_SHORT[index]}
+                </span>
+                <div className="flex items-center justify-center mt-1">
+                  {allOnTarget ? (
+                    <Check className={`w-3.5 h-3.5 ${isSelected ? 'text-primary' : 'text-primary/60'}`} />
+                  ) : (
+                    <AlertCircle className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-500' : 'text-amber-400/60'}`} />
+                  )}
+                </div>
+                {isSelected && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
                 )}
-              </div>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Selected Day Details */}
@@ -233,7 +243,7 @@ const Dashboard = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold">{currentDay.day}</h2>
+              <h2 className="text-xl font-semibold">{DAYS_FULL[selectedDay]}</h2>
               <p className="text-sm text-muted-foreground">{currentDay.date}</p>
             </div>
             <Button
@@ -369,82 +379,92 @@ const Dashboard = () => {
         </Card>
       )}
 
-      {/* Recipe Modal */}
+      {/* Recipe Modal - Scrollable */}
       <Dialog open={recipeModalOpen} onOpenChange={setRecipeModalOpen}>
-        <DialogContent className="max-w-lg rounded-2xl">
+        <DialogContent className="max-w-lg rounded-2xl p-0 max-h-[85vh] flex flex-col">
           {selectedRecipe && (
             <>
-              <DialogHeader>
+              <DialogHeader className="p-6 pb-0">
                 <DialogTitle className="text-xl">{selectedRecipe.name}</DialogTitle>
                 <DialogDescription>{selectedRecipe.description}</DialogDescription>
               </DialogHeader>
-              {selectedRecipe.image_url && (
-                <img
-                  src={selectedRecipe.image_url}
-                  alt={selectedRecipe.name}
-                  className="w-full h-48 object-cover rounded-xl"
-                />
-              )}
-              <div className="grid grid-cols-4 gap-3 text-center">
-                <div className="p-3 rounded-xl bg-secondary">
-                  <div className="text-lg font-semibold">{selectedRecipe.calories}</div>
-                  <div className="text-xs text-muted-foreground">cal</div>
+              <ScrollArea className="flex-1 px-6 pb-6">
+                <div className="space-y-5 pt-4">
+                  {/* Nutrition Grid */}
+                  <div className="grid grid-cols-4 gap-3 text-center">
+                    <div className="p-3 rounded-xl bg-secondary">
+                      <div className="text-lg font-semibold">{selectedRecipe.calories}</div>
+                      <div className="text-xs text-muted-foreground">cal</div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-secondary">
+                      <div className="text-lg font-semibold">{selectedRecipe.protein}g</div>
+                      <div className="text-xs text-muted-foreground">protein</div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-secondary">
+                      <div className="text-lg font-semibold">{selectedRecipe.carbs}g</div>
+                      <div className="text-xs text-muted-foreground">carbs</div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-secondary">
+                      <div className="text-lg font-semibold">{selectedRecipe.fat}g</div>
+                      <div className="text-xs text-muted-foreground">fat</div>
+                    </div>
+                  </div>
+
+                  {/* Time & Servings */}
+                  <div className="flex gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {selectedRecipe.prep_time + selectedRecipe.cook_time} min total
+                    </div>
+                    <div>{selectedRecipe.servings} serving(s)</div>
+                  </div>
+
+                  {/* Tags */}
+                  {selectedRecipe.tags?.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRecipe.tags.map((tag) => (
+                        <span key={tag} className="tag-chip">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Ingredients */}
+                  {selectedRecipe.ingredients?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-3">Ingredients</h4>
+                      <ul className="space-y-2 text-sm">
+                        {selectedRecipe.ingredients.map((ing, i) => (
+                          <li key={i} className="flex items-center gap-3 text-muted-foreground">
+                            <span className="w-2 h-2 rounded-full bg-primary/50 flex-shrink-0" />
+                            <span>
+                              <span className="text-foreground font-medium">{ing.quantity} {ing.unit}</span> {ing.name}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Instructions */}
+                  {selectedRecipe.instructions?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-3">Instructions</h4>
+                      <ol className="space-y-3 text-sm text-muted-foreground">
+                        {selectedRecipe.instructions.map((step, i) => (
+                          <li key={i} className="flex gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary font-medium flex items-center justify-center text-xs">
+                              {i + 1}
+                            </span>
+                            <span className="pt-0.5">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
                 </div>
-                <div className="p-3 rounded-xl bg-secondary">
-                  <div className="text-lg font-semibold">{selectedRecipe.protein}g</div>
-                  <div className="text-xs text-muted-foreground">protein</div>
-                </div>
-                <div className="p-3 rounded-xl bg-secondary">
-                  <div className="text-lg font-semibold">{selectedRecipe.carbs}g</div>
-                  <div className="text-xs text-muted-foreground">carbs</div>
-                </div>
-                <div className="p-3 rounded-xl bg-secondary">
-                  <div className="text-lg font-semibold">{selectedRecipe.fat}g</div>
-                  <div className="text-xs text-muted-foreground">fat</div>
-                </div>
-              </div>
-              <div className="flex gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {selectedRecipe.prep_time + selectedRecipe.cook_time} min total
-                </div>
-                <div>{selectedRecipe.servings} serving(s)</div>
-              </div>
-              {selectedRecipe.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {selectedRecipe.tags.map((tag) => (
-                    <span key={tag} className="tag-chip">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {selectedRecipe.ingredients?.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Ingredients</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    {selectedRecipe.ingredients.map((ing, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-                        {ing.quantity} {ing.unit} {ing.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {selectedRecipe.instructions?.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Instructions</h4>
-                  <ol className="space-y-2 text-sm text-muted-foreground">
-                    {selectedRecipe.instructions.map((step, i) => (
-                      <li key={i} className="flex gap-2">
-                        <span className="font-medium text-foreground">{i + 1}.</span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
+              </ScrollArea>
             </>
           )}
         </DialogContent>
