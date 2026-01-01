@@ -522,11 +522,12 @@ async def generate_meal_plan(user: dict = Depends(get_current_user)):
     recipe_usage_count = {}  # Track how many times each recipe is used
     current_unique = 0
     
-    # First pass: Generate all days
+    # Generate all days with usage tracking
     for i, day_name in enumerate(days):
         date_str = (week_start + timedelta(days=i)).strftime("%Y-%m-%d")
-        day_plan, used_recipe_ids, current_unique = await generate_day_plan(
-            day_name, date_str, targets, preferences, used_recipe_ids, max_unique, current_unique
+        day_plan, used_recipe_ids, current_unique, recipe_usage_count = await generate_day_plan(
+            day_name, date_str, targets, preferences, used_recipe_ids, max_unique, current_unique,
+            recipe_usage_count
         )
         day_plans.append(day_plan)
     
