@@ -139,21 +139,10 @@ const Recipes = () => {
               onClick={() => openRecipeModal(recipe)}
               data-testid={`recipe-card-${recipe.id}`}
             >
-              {recipe.image_url ? (
-                <img
-                  src={recipe.image_url}
-                  alt={recipe.name}
-                  className="w-full h-40 object-cover"
-                />
-              ) : (
-                <div className="w-full h-40 bg-accent flex items-center justify-center">
-                  <BookOpen className="w-12 h-12 text-muted-foreground" strokeWidth={1} />
-                </div>
-              )}
-              <CardContent className="p-4">
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold line-clamp-1">{recipe.name}</h3>
-                  <span className="text-xs px-2 py-1 rounded-full bg-secondary whitespace-nowrap">
+                  <span className="text-xs px-2 py-1 rounded-full bg-secondary whitespace-nowrap capitalize">
                     {recipe.meal_type}
                   </span>
                 </div>
@@ -170,6 +159,18 @@ const Recipes = () => {
                     {recipe.prep_time + recipe.cook_time}m
                   </div>
                 </div>
+                {recipe.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {recipe.tags.slice(0, 3).map((tag) => (
+                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-accent text-muted-foreground capitalize">
+                        {tag}
+                      </span>
+                    ))}
+                    {recipe.tags.length > 3 && (
+                      <span className="text-[10px] text-muted-foreground">+{recipe.tags.length - 3}</span>
+                    )}
+                  </div>
+                )}
                 {recipe.user_id && (
                   <div className="mt-2 text-xs text-primary font-medium">Your recipe</div>
                 )}
