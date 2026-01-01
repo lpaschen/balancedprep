@@ -1,0 +1,130 @@
+{
+  "identity": {
+    "name": "BalancedPrep",
+    "tone": "Calm, Nourishing, Organized, Effortless",
+    "archetype": "Organic & Earthy (Refined)",
+    "core_value": "Peace of mind in the kitchen. No fitness-bro energy."
+  },
+  "typography": {
+    "headings": {
+      "family": "Outfit, sans-serif",
+      "weights": ["500", "600", "700"],
+      "usage": "Use for all page titles, section headers, and day names. Tracking tight (-0.02em)."
+    },
+    "body": {
+      "family": "Plus Jakarta Sans, sans-serif",
+      "weights": ["400", "500", "600"],
+      "usage": "Use for all standard text, inputs, and list items. Relaxed line-height."
+    },
+    "instructions": "Import fonts from Google Fonts in index.css: @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');"
+  },
+  "colors": {
+    "palette_name": "Nourished Earth",
+    "variables": {
+      "light": {
+        "--background": "40 20% 98%", 
+        "--foreground": "24 10% 10%",
+        "--card": "0 0% 100%",
+        "--card-foreground": "24 10% 10%",
+        "--popover": "0 0% 100%",
+        "--popover-foreground": "24 10% 10%",
+        "--primary": "100 40% 40%",
+        "--primary-foreground": "0 0% 98%",
+        "--secondary": "40 20% 94%",
+        "--secondary-foreground": "24 10% 10%",
+        "--muted": "40 20% 94%",
+        "--muted-foreground": "24 5% 45%",
+        "--accent": "35 80% 96%",
+        "--accent-foreground": "24 10% 10%",
+        "--destructive": "0 84.2% 60.2%",
+        "--destructive-foreground": "0 0% 98%",
+        "--border": "40 10% 90%",
+        "--input": "40 10% 90%",
+        "--ring": "100 40% 40%",
+        "--radius": "1rem"
+      }
+    },
+    "usage_rules": [
+      "NEVER use pure black (#000000). Use the warm charcoal defined in --foreground.",
+      "Primary color (Sage Green) is for 'Success' and 'Action'. Do not overuse it.",
+      "Background is NOT white. It is a very pale warm stone (#FAFAF9). Cards are white.",
+      "Use 'Accent' (Pale Yellow/Cream) for highlighting active days or tips."
+    ]
+  },
+  "layout": {
+    "spacing_system": "Generous. Use p-6 or p-8 for main containers. Gap-6 for grids.",
+    "grid_strategy": {
+      "dashboard": "Bento Grid. 7 Days. Current day is col-span-2 or featured. Other days are smaller cards.",
+      "grocery_list": "Single column, wide cards with checkbox on left.",
+      "mobile": "Stack everything. Use bottom sheet (Drawer) for details."
+    },
+    "radius": "rounded-2xl (16px) for cards, rounded-full for buttons."
+  },
+  "components": {
+    "cards": {
+      "style": "Flat white background, 1px border-stone-200. No shadow by default.",
+      "hover": "shadow-md border-primary/30 transition-all duration-300 ease-out translate-y-[-2px]"
+    },
+    "buttons": {
+      "primary": "rounded-full px-8 py-6 text-lg font-medium shadow-sm hover:shadow-md transition-all",
+      "secondary": "rounded-full bg-stone-100 text-stone-800 hover:bg-stone-200"
+    },
+    "inputs": {
+      "style": "bg-white border-stone-200 h-12 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary"
+    },
+    "navigation": {
+      "style": "Bottom fixed bar on mobile (glassmorphism). Top simple nav on desktop."
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Use backdrop-blur-md bg-white/80 for sticky headers and toast notifications.",
+    "textures": "Add a very subtle noise texture to the main background if possible, or keep it clean flat stone.",
+    "icons": "Lucide React. Use stroke-width={1.5} for a refined look. Color: text-stone-600."
+  },
+  "motion": {
+    "page_transition": "Fade in + Slide Up (10px). Duration 0.4s.",
+    "list_entrance": "Stagger children by 0.05s.",
+    "hover_effects": "Scale 1.02 for cards. Brightness 1.1 for buttons."
+  },
+  "images": {
+    "landing_hero": {
+      "url": "https://images.unsplash.com/photo-1678831654314-8d68bb47cb0f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMGhlYWx0aHklMjBtZWFsJTIwcHJlcCUyMGNvbnRhaW5lcnMlMjB3b29kZW4lMjB0YWJsZXxlbnwwfHx8fDE3NjcyNzI3NDN8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Healthy meal prep on wooden table",
+      "usage": "Hero section background or side image"
+    },
+    "grocery_context": {
+      "url": "https://images.unsplash.com/photo-1617500603321-bcd6286973b7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxwYXBlciUyMGdyb2NlcnklMjBiYWclMjBmcmVzaCUyMHZlZ2V0YWJsZXMlMjB3aGl0ZSUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzY3MjcyNzQ1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Paper grocery bag with fresh vegetables",
+      "usage": "Empty state for grocery list or header for grocery section"
+    },
+    "meal_detail_placeholder": {
+      "url": "https://images.unsplash.com/photo-1594326014384-b08afa08aff5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxhdm9jYWRvJTIwdG9hc3QlMjBwbGF0ZSUyMHRvcCUyMGRvd24lMjB2aWV3fGVufDB8fHx8MTc2NzI3Mjc0Nnww&ixlib=rb-4.1.0&q=85",
+      "alt": "Avocado toast plate",
+      "usage": "Default image for recipes without photos"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. UPDATE /app/frontend/src/index.css with the CSS variables provided in 'colors.variables.light'. Remove the old ones.",
+    "2. INSTALL 'lucide-react' if not present.",
+    "3. CREATE a 'Layout' component that enforces the max-width and padding.",
+    "4. USE 'sonner' for all notifications (toast).",
+    "5. ENSURE all interactive elements have data-testid attributes.",
+    "6. DO NOT use gradients for backgrounds. Keep it flat and clean.",
+    "7. For the 'Meal Prep Level' slider, use a custom styled slider that looks like a volume knob or a simple track with steps.",
+    "8. The 'Grocery List' should feel like a paper checklist. Use a serif font for the list items if possible, or just clean sans."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: transition: all.",
+    "You MUST NOT center align the app container.",
+    "Always use modern button styles like pill-shaped.",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠 etc.",
+    "Every interaction needs micro-animations.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary."
+  ]
+}
