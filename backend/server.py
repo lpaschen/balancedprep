@@ -673,6 +673,96 @@ async def regenerate_day(request: RegenerateDayRequest, user: dict = Depends(get
 
 # ============ GROCERY LIST ============
 
+# Map ingredient names to granular categories
+INGREDIENT_CATEGORY_MAP = {
+    # Proteins
+    "tofu": "Proteins", "tempeh": "Proteins", "seitan": "Proteins", "tvp": "Proteins",
+    "chicken": "Meat", "beef": "Meat", "turkey": "Meat", "pork": "Meat",
+    "salmon": "Seafood", "fish": "Seafood", "shrimp": "Seafood",
+    
+    # Dairy & Eggs
+    "yogurt": "Dairy & Eggs", "milk": "Dairy & Eggs", "cheese": "Dairy & Eggs", 
+    "eggs": "Dairy & Eggs", "butter": "Dairy & Eggs", "cream": "Dairy & Eggs",
+    "feta": "Dairy & Eggs", "cheddar": "Dairy & Eggs",
+    
+    # Grains & Pasta
+    "rice": "Grains & Pasta", "quinoa": "Grains & Pasta", "oats": "Grains & Pasta",
+    "pasta": "Grains & Pasta", "farro": "Grains & Pasta", "bread": "Bakery",
+    "tortilla": "Bakery", "wrap": "Bakery",
+    
+    # Legumes & Beans
+    "chickpea": "Legumes & Beans", "lentil": "Legumes & Beans", "black bean": "Legumes & Beans",
+    "bean": "Legumes & Beans", "edamame": "Legumes & Beans", "lupini": "Legumes & Beans",
+    
+    # Nuts & Seeds
+    "almond": "Nuts & Seeds", "peanut": "Nuts & Seeds", "walnut": "Nuts & Seeds",
+    "cashew": "Nuts & Seeds", "chia": "Nuts & Seeds", "hemp": "Nuts & Seeds",
+    "sesame": "Nuts & Seeds", "pumpkin seed": "Nuts & Seeds", "sunflower": "Nuts & Seeds",
+    "nut": "Nuts & Seeds", "seed": "Nuts & Seeds",
+    
+    # Oils & Vinegars
+    "oil": "Oils & Vinegars", "olive oil": "Oils & Vinegars", "sesame oil": "Oils & Vinegars",
+    "vinegar": "Oils & Vinegars", "coconut oil": "Oils & Vinegars",
+    
+    # Spices & Seasonings
+    "salt": "Spices & Seasonings", "pepper": "Spices & Seasonings", "cumin": "Spices & Seasonings",
+    "turmeric": "Spices & Seasonings", "paprika": "Spices & Seasonings", "curry": "Spices & Seasonings",
+    "garlic powder": "Spices & Seasonings", "herbs": "Spices & Seasonings", "spice": "Spices & Seasonings",
+    "cinnamon": "Spices & Seasonings", "ginger powder": "Spices & Seasonings",
+    "italian herbs": "Spices & Seasonings", "taco seasoning": "Spices & Seasonings",
+    "red pepper flakes": "Spices & Seasonings",
+    
+    # Sauces & Condiments
+    "tamari": "Sauces & Condiments", "soy sauce": "Sauces & Condiments", "sriracha": "Sauces & Condiments",
+    "salsa": "Sauces & Condiments", "mustard": "Sauces & Condiments", "tahini": "Sauces & Condiments",
+    "hummus": "Sauces & Condiments", "maple syrup": "Sauces & Condiments", "honey": "Sauces & Condiments",
+    "peanut butter": "Sauces & Condiments", "almond butter": "Sauces & Condiments",
+    "sour cream": "Sauces & Condiments",
+    
+    # Canned Goods
+    "crushed tomato": "Canned Goods", "tomato": "Canned Goods", "coconut milk": "Canned Goods",
+    "broth": "Canned Goods", "vegetable broth": "Canned Goods",
+    
+    # Produce (fresh)
+    "spinach": "Produce", "kale": "Produce", "lettuce": "Produce", "broccoli": "Produce",
+    "carrot": "Produce", "onion": "Produce", "garlic": "Produce", "ginger": "Produce",
+    "bell pepper": "Produce", "cucumber": "Produce", "tomato": "Produce", "avocado": "Produce",
+    "banana": "Produce", "apple": "Produce", "lemon": "Produce", "lime": "Produce",
+    "berry": "Produce", "potato": "Produce", "sweet potato": "Produce",
+    "cabbage": "Produce", "bok choy": "Produce", "celery": "Produce", "parsley": "Produce",
+    "cauliflower": "Produce", "corn": "Produce", "snap pea": "Produce",
+    
+    # Protein powders
+    "protein powder": "Proteins", "pea protein": "Proteins",
+    
+    # Frozen
+    "frozen": "Frozen",
+}
+
+def get_granular_category(ingredient_name: str, default_category: str) -> str:
+    """Map ingredient to a more granular category."""
+    name_lower = ingredient_name.lower()
+    
+    # Check for exact or partial matches
+    for keyword, category in INGREDIENT_CATEGORY_MAP.items():
+        if keyword in name_lower:
+            return category
+    
+    # Map old 'Pantry' to more specific categories based on context
+    if default_category == "Pantry":
+        # Try to infer from name
+        if any(x in name_lower for x in ["flour", "sugar", "baking"]):
+            return "Baking"
+        if any(x in name_lower for x in ["chip", "cracker", "granola"]):
+            return "Snacks"
+        return "Other"
+    
+    # Map old 'Dairy' to new 'Dairy & Eggs'
+    if default_category == "Dairy":
+        return "Dairy & Eggs"
+    
+    return default_category
+
 async def generate_grocery_list(user_id: str, meal_plan: MealPlan):
     """Generate consolidated grocery list from meal plan."""
     ingredients_map = {}  # {name_unit: {name, quantity, unit, category}}
@@ -683,6 +773,9 @@ async def generate_grocery_list(user_id: str, meal_plan: MealPlan):
             if recipe:
                 for ing in recipe.get("ingredients", []):
                     key = f"{ing['name'].lower()}_{ing.get('unit', 'unit')}"
+                    # Get granular category
+                    category = get_granular_category(ing["name"], ing.get("category", "Other"))
+                    
                     if key in ingredients_map:
                         ingredients_map[key]["quantity"] += ing.get("quantity", 1) * meal.servings
                     else:
@@ -691,7 +784,7 @@ async def generate_grocery_list(user_id: str, meal_plan: MealPlan):
                             "name": ing["name"],
                             "quantity": ing.get("quantity", 1) * meal.servings,
                             "unit": ing.get("unit", "unit"),
-                            "category": ing.get("category", "Other"),
+                            "category": category,
                             "checked": False
                         }
     
