@@ -1,34 +1,154 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App-specific styles */
+
+/* Card hover effect */
+.meal-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+.meal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: hsl(100 40% 40% / 0.3);
+}
+
+/* Day card active state */
+.day-card-active {
+    background: hsl(35 80% 96%);
+    border-color: hsl(100 40% 40% / 0.4);
+}
+
+/* Nutrition bar styles */
+.nutrition-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: hsl(40 20% 94%);
+    overflow: hidden;
+}
+
+.nutrition-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+}
+
+/* On-target indicator */
+.target-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.target-indicator.on-target {
+    background: hsl(100 40% 40%);
+}
+
+.target-indicator.off-target {
+    background: hsl(35 80% 55%);
+}
+
+/* Prep level slider custom styling */
+.prep-slider {
+    height: 8px;
+    background: linear-gradient(to right, 
+        hsl(100 40% 75%), 
+        hsl(100 40% 40%)
+    );
+    border-radius: 4px;
+}
+
+/* Bottom navigation mobile */
+@media (max-width: 768px) {
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+/* Checkbox custom style for grocery list */
+.grocery-checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid hsl(40 10% 80%);
+    transition: all 0.2s ease;
+}
+
+.grocery-checkbox:checked {
+    background: hsl(100 40% 40%);
+    border-color: hsl(100 40% 40%);
+}
+
+/* Recipe image aspect ratio */
+.recipe-image {
+    aspect-ratio: 4/3;
+    object-fit: cover;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        hsl(40 20% 94%) 25%,
+        hsl(40 20% 90%) 50%,
+        hsl(40 20% 94%) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Button hover effects */
+.btn-primary {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px hsl(100 40% 40% / 0.25);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Input focus ring */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: hsl(100 40% 40% / 0.2);
+    border-color: hsl(100 40% 40%);
+}
+
+/* Tag chips */
+.tag-chip {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: hsl(40 20% 94%);
+    color: hsl(24 10% 30%);
+    transition: background-color 0.2s ease;
+}
+
+.tag-chip:hover {
+    background: hsl(40 20% 90%);
+}
+
+.tag-chip.active {
+    background: hsl(100 40% 40%);
     color: white;
-}
-
-.App-link {
-    color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
 }
