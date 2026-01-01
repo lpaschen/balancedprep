@@ -349,8 +349,8 @@ async def select_recipe_for_meal(
         carb_remaining = (targets.get("carbs") or 0) - day_totals["carbs"]
         fat_remaining = (targets.get("fat") or 0) - day_totals["fat"]
         
-        # Meal fractions based on meal type
-        meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
+        # Meal fractions based on meal type - bigger main meals for protein
+        meal_fraction = 0.32 if meal_type in ["breakfast", "lunch", "dinner"] else 0.04
         
         # Score based on how well recipe fits remaining needs
         # PROTEIN weighted 3x more important (common user pain point)
@@ -400,12 +400,12 @@ async def select_recipe_for_meal(
     
     if ideal_servings:
         # Use average, weighted toward protein if both present
-        if len(ideal_servings) == 2:
-            avg_serving = ideal_servings[0] * 0.4 + ideal_servings[1] * 0.6  # Weight protein more
+        if len(ideal_servings) >= 2:
+            avg_serving = ideal_servings[0] * 0.3 + ideal_servings[1] * 0.7  # Weight protein heavily
         else:
             avg_serving = ideal_servings[0]
-        # Round to nearest 0.25 and clamp between 0.5 and 2.5
-        serving = max(0.5, min(2.5, round(avg_serving * 4) / 4))
+        # Round to nearest 0.25 and clamp between 0.75 and 3.0 (allow larger portions)
+        serving = max(0.75, min(3.0, round(avg_serving * 4) / 4))
     
     return selected, serving
 
