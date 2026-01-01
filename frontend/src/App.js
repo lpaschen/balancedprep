@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import MealPrep from "./pages/MealPrep";
 import GroceryList from "./pages/GroceryList";
 import Recipes from "./pages/Recipes";
 import AddRecipe from "./pages/AddRecipe";
