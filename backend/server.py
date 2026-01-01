@@ -489,8 +489,16 @@ async def generate_meal_plan(user: dict = Depends(get_current_user)):
     if not active_targets:
         raise HTTPException(status_code=400, detail="Please set at least one nutrition target")
     
-    # Max unique meals based on prep level: 1=7, 2=10, 3=14, 4=21, 5=28
-    max_unique = 7 + (prep_level - 1) * 5
+    # Max unique meals based on prep level
+    # With 28 meal slots (7 days × 4 meals), to ensure each recipe appears 2x minimum:
+    # max_unique should be at most 14 (28/2)
+    # Level 1 (Minimal) = 5 unique (avg 5.6x each) - great for batch cooking
+    # Level 2 (Low) = 7 unique (avg 4x each)
+    # Level 3 (Moderate) = 9 unique (avg 3.1x each)
+    # Level 4 (High) = 11 unique (avg 2.5x each)
+    # Level 5 (Maximum) = 14 unique (avg 2x each) - still batched
+    max_unique_map = {1: 5, 2: 7, 3: 9, 4: 11, 5: 14}
+    max_unique = max_unique_map.get(prep_level, 9)
     
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     today = datetime.now(timezone.utc)
@@ -502,8 +510,10 @@ async def generate_meal_plan(user: dict = Depends(get_current_user)):
     
     day_plans = []
     used_recipe_ids = set()
+    recipe_usage_count = {}  # Track how many times each recipe is used
     current_unique = 0
     
+    # First pass: Generate all days
     for i, day_name in enumerate(days):
         date_str = (week_start + timedelta(days=i)).strftime("%Y-%m-%d")
         day_plan, used_recipe_ids, current_unique = await generate_day_plan(
