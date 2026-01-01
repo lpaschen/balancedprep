@@ -349,8 +349,8 @@ async def select_recipe_for_meal(
         carb_remaining = (targets.get("carbs") or 0) - day_totals["carbs"]
         fat_remaining = (targets.get("fat") or 0) - day_totals["fat"]
         
-        # Meal fractions based on meal type - bigger main meals for protein
-        meal_fraction = 0.32 if meal_type in ["breakfast", "lunch", "dinner"] else 0.04
+        # Meal fractions: main meals ~30% each, snack ~10%
+        meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
         
         # Score based on how well recipe fits remaining needs
         # PROTEIN weighted 3x more important (common user pain point)
