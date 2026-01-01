@@ -386,10 +386,10 @@ async def select_recipe_for_meal(
     # Determine serving multiplier - optimize for BOTH calories and protein
     serving = 1.0
     
-    # Calculate ideal serving based on targets (NOT remaining, use full daily targets)
-    # Each main meal should be ~32% of daily targets, snacks ~4%
+    # Calculate ideal serving based on targets
+    # Main meals: ~30% each (90% total), Snack: ~10%
     ideal_servings = []
-    meal_frac = 0.32 if meal_type in ["breakfast", "lunch", "dinner"] else 0.04
+    meal_frac = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
     
     if targets.get("calories") and targets["calories"] > 0 and selected["calories"] > 0:
         target_cal = targets["calories"] * meal_frac
@@ -400,13 +400,13 @@ async def select_recipe_for_meal(
         ideal_servings.append(target_prot / selected["protein"])
     
     if ideal_servings:
-        # Weight protein more heavily (70%) to ensure protein targets are hit
+        # For protein-focused plans, weight protein more (60%)
         if len(ideal_servings) >= 2:
-            avg_serving = ideal_servings[0] * 0.3 + ideal_servings[1] * 0.7
+            avg_serving = ideal_servings[0] * 0.4 + ideal_servings[1] * 0.6
         else:
             avg_serving = ideal_servings[0]
-        # Round to nearest 0.25 and clamp between 0.75 and 2.5
-        serving = max(0.75, min(2.5, round(avg_serving * 4) / 4))
+        # Round to nearest 0.25 and allow range from 0.75 to 2.0
+        serving = max(0.75, min(2.0, round(avg_serving * 4) / 4))
     
     return selected, serving
 
