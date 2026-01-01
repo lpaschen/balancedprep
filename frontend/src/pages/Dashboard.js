@@ -419,6 +419,19 @@ const Dashboard = () => {
                   ))}
                 </div>
               )}
+              {selectedRecipe.ingredients?.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Ingredients</h4>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
+                    {selectedRecipe.ingredients.map((ing, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+                        {ing.quantity} {ing.unit} {ing.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {selectedRecipe.instructions?.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Instructions</h4>
