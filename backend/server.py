@@ -339,45 +339,31 @@ async def select_recipe_for_meal(
     # Calculate what we still need to hit targets
     day_totals = day_running_totals or {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
     
-    # Score recipes by how well they help meet remaining targets
+    # Meal fractions: main meals ~30% each, snack ~10%
+    meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
+    
+    # Score recipes - prioritize HIGH PROTEIN recipes that fit the meal slot
     def score_recipe(recipe):
         score = 0
         
-        # Calculate remaining needs
-        cal_remaining = (targets.get("calories") or 0) - day_totals["calories"]
-        prot_remaining = (targets.get("protein") or 0) - day_totals["protein"]
-        carb_remaining = (targets.get("carbs") or 0) - day_totals["carbs"]
-        fat_remaining = (targets.get("fat") or 0) - day_totals["fat"]
+        # Target macros for this meal slot
+        target_cal = (targets.get("calories") or 2000) * meal_fraction
+        target_prot = (targets.get("protein") or 100) * meal_fraction
         
-        # Meal fractions: main meals ~30% each, snack ~10%
-        meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
-        
-        # Score based on how well recipe fits remaining needs
-        # PROTEIN weighted 3x more important (common user pain point)
+        # HEAVILY favor high-protein recipes (main scoring factor)
         if targets.get("protein") and targets["protein"] > 0:
-            target_protein = max(prot_remaining * meal_fraction, targets["protein"] * meal_fraction)
-            protein_diff = abs(recipe["protein"] - target_protein)
-            score -= protein_diff * 3  # Heavy weight on protein
+            # Reward recipes with protein close to or above target
+            if recipe["protein"] >= target_prot:
+                score += 50  # Big bonus for meeting protein target
+            score += recipe["protein"] * 2  # Linear bonus for protein content
         
+        # Penalize recipes that are way off on calories
         if targets.get("calories") and targets["calories"] > 0:
-            target_cal = max(cal_remaining * meal_fraction, targets["calories"] * meal_fraction)
-            cal_diff = abs(recipe["calories"] - target_cal)
-            score -= cal_diff / 50  # Normalize calories
+            cal_diff_pct = abs(recipe["calories"] - target_cal) / target_cal
+            score -= cal_diff_pct * 10  # Small penalty for calorie mismatch
         
-        if targets.get("carbs") and targets["carbs"] > 0:
-            target_carbs = max(carb_remaining * meal_fraction, targets["carbs"] * meal_fraction)
-            score -= abs(recipe["carbs"] - target_carbs)
-        
-        if targets.get("fat") and targets["fat"] > 0:
-            target_fat = max(fat_remaining * meal_fraction, targets["fat"] * meal_fraction)
-            score -= abs(recipe["fat"] - target_fat)
-        
-        # Prefer high-protein recipes when protein target is set
-        if targets.get("protein") and targets["protein"] > 0:
-            score += recipe["protein"] * 0.5  # Bonus for protein-rich recipes
-        
-        # Small randomness to avoid repetition
-        score += random.uniform(-2, 2)
+        # Small randomness to avoid exact same picks
+        score += random.uniform(-3, 3)
         return score
     
     recipes.sort(key=score_recipe, reverse=True)
