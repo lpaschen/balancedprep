@@ -81,6 +81,16 @@ function App() {
             }
           />
           <Route
+            path="/meal-prep"
+            element={
+              <OnboardingGuard>
+                <Layout>
+                  <MealPrep />
+                </Layout>
+              </OnboardingGuard>
+            }
+          />
+          <Route
             path="/grocery"
             element={
               <OnboardingGuard>
