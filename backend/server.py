@@ -308,21 +308,26 @@ async def select_recipe_for_meal(
     preferences: List[str],
     used_recipe_ids: set,
     max_unique: int,
-    current_unique: int
+    current_unique: int,
+    day_running_totals: Dict[str, float] = None
 ) -> Optional[tuple]:
     """Select a recipe that fits preferences and targets."""
     query = {"meal_type": meal_type}
     
-    # Filter by dietary preferences
-    if preferences:
-        query["tags"] = {"$all": preferences}
+    # STRICT dietary preference filtering - never ignore these
+    # Vegan/vegetarian are mutually exclusive diet types that must be respected
+    strict_prefs = [p for p in preferences if p in ['vegan', 'vegetarian', 'gluten-free', 'dairy-free', 'nut-free', 'keto', 'paleo', 'low-sodium']]
+    
+    if strict_prefs:
+        # All strict preferences must be matched
+        query["tags"] = {"$all": strict_prefs}
     
     recipes = await db.recipes.find(query, {"_id": 0}).to_list(100)
-    if not recipes:
-        # Fallback: get any recipe of this type
-        recipes = await db.recipes.find({"meal_type": meal_type}, {"_id": 0}).to_list(100)
     
+    # NO FALLBACK - if no recipes match preferences, return None
+    # The caller should handle this by notifying the user
     if not recipes:
+        logger.warning(f"No recipes found for {meal_type} matching preferences: {strict_prefs}")
         return None
     
     # If we've hit max unique, prefer already used recipes
@@ -331,32 +336,76 @@ async def select_recipe_for_meal(
         if used_recipes:
             recipes = used_recipes
     
-    # Score recipes by how well they fit targets
+    # Calculate what we still need to hit targets
+    day_totals = day_running_totals or {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
+    
+    # Score recipes by how well they help meet remaining targets
     def score_recipe(recipe):
         score = 0
-        if targets.get("calories") and targets["calories"] > 0:
-            score -= abs(recipe["calories"] - targets["calories"] / 4) / 100
+        
+        # Calculate remaining needs
+        cal_remaining = (targets.get("calories") or 0) - day_totals["calories"]
+        prot_remaining = (targets.get("protein") or 0) - day_totals["protein"]
+        carb_remaining = (targets.get("carbs") or 0) - day_totals["carbs"]
+        fat_remaining = (targets.get("fat") or 0) - day_totals["fat"]
+        
+        # Meal fractions based on meal type
+        meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
+        
+        # Score based on how well recipe fits remaining needs
+        # PROTEIN weighted 3x more important (common user pain point)
         if targets.get("protein") and targets["protein"] > 0:
-            score -= abs(recipe["protein"] - targets["protein"] / 4) / 10
+            target_protein = max(prot_remaining * meal_fraction, targets["protein"] * meal_fraction)
+            protein_diff = abs(recipe["protein"] - target_protein)
+            score -= protein_diff * 3  # Heavy weight on protein
+        
+        if targets.get("calories") and targets["calories"] > 0:
+            target_cal = max(cal_remaining * meal_fraction, targets["calories"] * meal_fraction)
+            cal_diff = abs(recipe["calories"] - target_cal)
+            score -= cal_diff / 50  # Normalize calories
+        
         if targets.get("carbs") and targets["carbs"] > 0:
-            score -= abs(recipe["carbs"] - targets["carbs"] / 4) / 10
+            target_carbs = max(carb_remaining * meal_fraction, targets["carbs"] * meal_fraction)
+            score -= abs(recipe["carbs"] - target_carbs)
+        
         if targets.get("fat") and targets["fat"] > 0:
-            score -= abs(recipe["fat"] - targets["fat"] / 4) / 10
-        # Add randomness
-        score += random.uniform(-5, 5)
+            target_fat = max(fat_remaining * meal_fraction, targets["fat"] * meal_fraction)
+            score -= abs(recipe["fat"] - target_fat)
+        
+        # Prefer high-protein recipes when protein target is set
+        if targets.get("protein") and targets["protein"] > 0:
+            score += recipe["protein"] * 0.5  # Bonus for protein-rich recipes
+        
+        # Small randomness to avoid repetition
+        score += random.uniform(-2, 2)
         return score
     
     recipes.sort(key=score_recipe, reverse=True)
     selected = recipes[0]
     
-    # Determine serving multiplier
+    # Determine serving multiplier - optimize for BOTH calories and protein
     serving = 1.0
-    if targets.get("calories") and targets["calories"] > 0:
-        meal_fraction = 0.25 if meal_type in ["breakfast", "lunch", "dinner"] else 0.125
-        target_calories = targets["calories"] * meal_fraction
-        if selected["calories"] > 0:
-            ideal_serving = target_calories / selected["calories"]
-            serving = max(0.5, min(2.0, round(ideal_serving * 2) / 2))  # 0.5, 1.0, 1.5, 2.0
+    
+    # Calculate ideal serving based on multiple targets
+    ideal_servings = []
+    meal_fraction = 0.30 if meal_type in ["breakfast", "lunch", "dinner"] else 0.10
+    
+    if targets.get("calories") and targets["calories"] > 0 and selected["calories"] > 0:
+        target_cal = targets["calories"] * meal_fraction
+        ideal_servings.append(target_cal / selected["calories"])
+    
+    if targets.get("protein") and targets["protein"] > 0 and selected["protein"] > 0:
+        target_prot = targets["protein"] * meal_fraction
+        ideal_servings.append(target_prot / selected["protein"])
+    
+    if ideal_servings:
+        # Use average, weighted toward protein if both present
+        if len(ideal_servings) == 2:
+            avg_serving = ideal_servings[0] * 0.4 + ideal_servings[1] * 0.6  # Weight protein more
+        else:
+            avg_serving = ideal_servings[0]
+        # Round to nearest 0.25 and clamp between 0.5 and 2.5
+        serving = max(0.5, min(2.5, round(avg_serving * 4) / 4))
     
     return selected, serving
 
@@ -373,9 +422,13 @@ async def generate_day_plan(
     meals = []
     meal_types = ["breakfast", "lunch", "dinner", "snack"]
     
+    # Track running totals to optimize each meal selection
+    day_running_totals = {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
+    
     for meal_type in meal_types:
         result = await select_recipe_for_meal(
-            meal_type, targets, preferences, used_recipe_ids, max_unique, current_unique
+            meal_type, targets, preferences, used_recipe_ids, max_unique, current_unique,
+            day_running_totals
         )
         if result:
             recipe, serving = result
@@ -393,6 +446,12 @@ async def generate_day_plan(
                 carbs=recipe["carbs"],
                 fat=recipe["fat"]
             ))
+            
+            # Update running totals for next meal selection
+            day_running_totals["calories"] += recipe["calories"] * serving
+            day_running_totals["protein"] += recipe["protein"] * serving
+            day_running_totals["carbs"] += recipe["carbs"] * serving
+            day_running_totals["fat"] += recipe["fat"] * serving
     
     totals = calculate_day_totals(meals)
     deltas = calculate_deltas(totals, targets)
