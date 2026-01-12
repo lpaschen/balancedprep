@@ -404,7 +404,7 @@ const Dashboard = () => {
 
       {/* Today's Meals */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Today's Meals</h2>
+        <h2 className="text-lg font-semibold mb-4">Today&apos;s Meals</h2>
         <div className="space-y-3 stagger-children">
           {currentDay.meals.map((meal, mealIndex) => {
             const badge = getMealBadge(meal, currentDay.totals, user?.targets);
