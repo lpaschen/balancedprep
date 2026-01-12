@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import {
@@ -20,6 +21,8 @@ import {
   Utensils,
   Clock,
   Shuffle,
+  Settings,
+  Lightbulb,
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -27,6 +30,70 @@ const API = `${BACKEND_URL}/api`;
 
 const DAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+// Helper to format date like "Jan 5"
+const formatShortDate = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+// Helper to generate meal contribution badge
+const getMealBadge = (meal, dailyTotals, userTargets) => {
+  const mealCalories = Math.round(meal.calories * meal.servings);
+  const mealProtein = Math.round(meal.protein * meal.servings);
+  
+  const proteinTarget = userTargets?.protein;
+  const calorieTarget = userTargets?.calories;
+  
+  // Calculate protein percentage of daily target
+  if (proteinTarget && mealProtein > 0) {
+    const proteinPercentage = Math.round((mealProtein / proteinTarget) * 100);
+    if (proteinPercentage >= 30) {
+      return { text: `~${proteinPercentage}% of daily protein`, type: 'protein' };
+    }
+  }
+  
+  // Check if it's protein-forward (high protein relative to calories)
+  const proteinRatio = mealProtein / (mealCalories || 1) * 100;
+  if (proteinRatio > 10) {
+    return { text: 'Protein-forward meal', type: 'protein' };
+  }
+  
+  // Check if it's a light calorie option
+  if (calorieTarget && mealCalories < (calorieTarget * 0.15)) {
+    return { text: 'Light calorie option', type: 'light' };
+  }
+  
+  return null;
+};
+
+// Helper to generate contextual guidance
+const getContextualGuidance = (currentDay, userTargets) => {
+  const guidance = [];
+  
+  if (userTargets?.calories) {
+    const remaining = userTargets.calories - currentDay.totals.calories;
+    if (remaining > 200) {
+      guidance.push({
+        type: 'calories',
+        message: 'Room for more calories today — a balanced snack could help you reach your energy goals.'
+      });
+    }
+  }
+  
+  if (userTargets?.protein) {
+    const remaining = userTargets.protein - currentDay.totals.protein;
+    if (remaining > 15) {
+      guidance.push({
+        type: 'protein',
+        message: 'Slightly under protein — consider a small protein-forward snack.'
+      });
+    }
+  }
+  
+  return guidance;
+};
 
 const Dashboard = () => {
   const { token, user } = useAuth();
