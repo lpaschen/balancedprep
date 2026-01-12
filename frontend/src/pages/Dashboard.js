@@ -193,12 +193,6 @@ const Dashboard = () => {
     }
   };
 
-  const formatDelta = (value, unit = '') => {
-    if (value === null || value === undefined) return '-';
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${Math.round(value)}${unit}`;
-  };
-
   const activeTargets = user?.targets
     ? Object.entries(user.targets).filter(([_, v]) => v !== null && v > 0)
     : [];
