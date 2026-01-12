@@ -203,6 +203,24 @@ const Dashboard = () => {
     ? Object.entries(user.targets).filter(([_, v]) => v !== null && v > 0)
     : [];
 
+  // Get formatted goal badges for display
+  const getGoalBadges = () => {
+    const badges = [];
+    if (user?.targets?.calories) {
+      badges.push({ label: `${Math.round(user.targets.calories)} cal`, key: 'calories' });
+    }
+    if (user?.targets?.protein) {
+      badges.push({ label: `${Math.round(user.targets.protein)}g protein`, key: 'protein' });
+    }
+    if (user?.targets?.carbs) {
+      badges.push({ label: `${Math.round(user.targets.carbs)}g carbs`, key: 'carbs' });
+    }
+    if (user?.targets?.fat) {
+      badges.push({ label: `${Math.round(user.targets.fat)}g fat`, key: 'fat' });
+    }
+    return badges;
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 animate-fade-in" data-testid="dashboard-loading">
