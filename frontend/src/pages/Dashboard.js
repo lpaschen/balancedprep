@@ -97,6 +97,7 @@ const getContextualGuidance = (currentDay, userTargets) => {
 
 const Dashboard = () => {
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const [mealPlan, setMealPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
