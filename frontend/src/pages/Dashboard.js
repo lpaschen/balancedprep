@@ -265,29 +265,11 @@ const Dashboard = () => {
   }
 
   const currentDay = mealPlan.days[selectedDay];
+  const goalBadges = getGoalBadges();
+  const contextualGuidance = getContextualGuidance(currentDay, user?.targets);
 
   return (
     <div className="space-y-6 animate-fade-in" data-testid="dashboard">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Your Meal Plan</h1>
-          <p className="text-muted-foreground mt-1">
-            {mealPlan.unique_meals_count} unique meals • ±{mealPlan.tolerance}% tolerance
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={generatePlan}
-          disabled={generating}
-          className="rounded-full"
-          data-testid="regenerate-week-btn"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
-          Regenerate Week
-        </Button>
-      </div>
-
       {/* Day Selector - Full Width Tabs */}
       <div className="w-full">
         <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 bg-secondary/50 rounded-2xl">
@@ -324,142 +306,188 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Selected Day Details */}
+      {/* Day Header with Goals and Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          {/* Day + Date Inline */}
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            {DAYS_FULL[selectedDay]} <span className="text-muted-foreground font-normal">· {formatShortDate(currentDay.date)}</span>
+          </h1>
+          {/* Goal Badges */}
+          {goalBadges.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {goalBadges.map((badge) => (
+                <span
+                  key={badge.key}
+                  className="px-3 py-1 text-sm font-medium rounded-full bg-[#f5f0e8] text-[#5c5a52]"
+                >
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/onboarding')}
+            className="rounded-full text-muted-foreground hover:text-foreground"
+          >
+            <Settings className="w-4 h-4 mr-1.5" />
+            Edit goals
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => regenerateDay(selectedDay)}
+            disabled={generating}
+            className="rounded-full"
+            data-testid="regenerate-day-btn"
+          >
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${generating ? 'animate-spin' : ''}`} />
+            Regenerate
+          </Button>
+        </div>
+      </div>
+
+      {/* Daily Progress Card */}
       <Card className="rounded-2xl border-border">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-semibold">{DAYS_FULL[selectedDay]}</h2>
-              <p className="text-sm text-muted-foreground">{currentDay.date}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => regenerateDay(selectedDay)}
-              disabled={generating}
-              className="rounded-full"
-              data-testid="regenerate-day-btn"
-            >
-              <RefreshCw className={`w-4 h-4 mr-1 ${generating ? 'animate-spin' : ''}`} />
-              Regenerate Day
-            </Button>
-          </div>
-
-          {/* Nutrition Summary */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <h2 className="text-lg font-semibold mb-5">Daily Progress</h2>
+          <div className="space-y-5">
             {['calories', 'protein', 'carbs', 'fat'].map((key) => {
               const target = user?.targets?.[key];
               const total = currentDay.totals[key];
-              const delta = currentDay.deltas[key];
-              const onTarget = currentDay.on_target[key];
               const isTracked = target !== null && target > 0;
+              const remaining = isTracked ? Math.max(0, target - total) : 0;
+              const percentage = isTracked ? Math.min(100, (total / target) * 100) : 0;
+              const unit = key === 'calories' ? 'cal' : 'g';
+              
+              // Color classes based on macro type
+              const barColor = key === 'calories' ? 'bg-[#5a8a5a]' : 
+                              key === 'protein' ? 'bg-[#5a8a5a]' : 
+                              'bg-[#c9c4b8]';
 
               return (
-                <div
-                  key={key}
-                  className={`p-4 rounded-xl ${isTracked ? 'bg-secondary' : 'bg-muted/50'}`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                      {key}
+                <div key={key} className={isTracked ? '' : 'opacity-60'}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-sm font-medium capitalize ${isTracked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
                     </span>
-                    {isTracked && (
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          onTarget ? 'bg-primary' : 'bg-amber-500'
-                        }`}
-                      />
-                    )}
-                  </div>
-                  <div className="text-lg font-semibold">
-                    {Math.round(total)}
-                    {key !== 'calories' && 'g'}
-                  </div>
-                  {isTracked && (
-                    <div
-                      className={`text-xs ${
-                        onTarget ? 'text-primary' : 'text-amber-600'
-                      }`}
-                    >
-                      {formatDelta(delta, key !== 'calories' ? 'g' : '')} vs target
+                    <div className="text-right">
+                      {isTracked ? (
+                        <>
+                          <span className="text-sm font-semibold">
+                            {Math.round(total)} / {Math.round(target)} {unit}
+                          </span>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {Math.round(remaining)} remaining
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm text-muted-foreground italic">No goal set</span>
+                          <span className="text-sm font-medium ml-2">{Math.round(total)}{unit}</span>
+                        </>
+                      )}
                     </div>
-                  )}
-                  {!isTracked && (
-                    <div className="text-xs text-muted-foreground">Not tracked</div>
-                  )}
+                  </div>
+                  {/* Progress Bar */}
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                      style={{ width: isTracked ? `${percentage}%` : '100%' }}
+                    />
+                  </div>
                 </div>
               );
             })}
           </div>
-
-          {/* Meals */}
-          <div className="space-y-3 stagger-children">
-            {currentDay.meals.map((meal, mealIndex) => (
-              <div
-                key={`${meal.meal_type}-${mealIndex}`}
-                className="meal-card p-4 rounded-xl border border-border bg-card flex items-center gap-4"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs uppercase tracking-wider text-muted-foreground">
-                      {meal.meal_type}
-                    </span>
-                    {meal.servings !== 1 && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-accent">
-                        {meal.servings}x
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => fetchRecipeDetails(meal.recipe_id)}
-                    className="text-left font-medium hover:text-primary transition-colors truncate block w-full"
-                    data-testid={`meal-${meal.meal_type}-name`}
-                  >
-                    {meal.recipe_name}
-                  </button>
-                  <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                    <span>{Math.round(meal.calories * meal.servings)} cal</span>
-                    <span>{Math.round(meal.protein * meal.servings)}g protein</span>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => swapMeal(selectedDay, mealIndex)}
-                  disabled={swapping === `${selectedDay}-${mealIndex}`}
-                  className="rounded-full"
-                  data-testid={`swap-meal-${mealIndex}`}
-                >
-                  {swapping === `${selectedDay}-${mealIndex}` ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Shuffle className="w-4 h-4" />
-                  )}
-                </Button>
-                <ChevronRight
-                  className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-foreground"
-                  onClick={() => fetchRecipeDetails(meal.recipe_id)}
-                />
-              </div>
-            ))}
-          </div>
         </CardContent>
       </Card>
 
-      {/* Target Summary */}
-      {activeTargets.length > 0 && (
-        <Card className="rounded-2xl border-border">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Your Daily Targets</h3>
-            <div className="flex flex-wrap gap-3">
-              {activeTargets.map(([key, value]) => (
-                <div key={key} className="px-4 py-2 rounded-full bg-secondary">
-                  <span className="font-medium">{Math.round(value)}</span>
-                  <span className="text-muted-foreground ml-1">
-                    {key === 'calories' ? 'cal' : `g ${key}`}
-                  </span>
-                </div>
-              ))}
+      {/* Today's Meals */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Today's Meals</h2>
+        <div className="space-y-3 stagger-children">
+          {currentDay.meals.map((meal, mealIndex) => {
+            const badge = getMealBadge(meal, currentDay.totals, user?.targets);
+            
+            return (
+              <Card
+                key={`${meal.meal_type}-${mealIndex}`}
+                className="rounded-2xl border-border hover:shadow-sm transition-shadow"
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                          {meal.meal_type}
+                        </span>
+                        {meal.servings !== 1 && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary font-medium">
+                            {meal.servings}x
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => fetchRecipeDetails(meal.recipe_id)}
+                        className="text-left font-semibold hover:text-primary transition-colors truncate block w-full"
+                        data-testid={`meal-${meal.meal_type}-name`}
+                      >
+                        {meal.recipe_name}
+                      </button>
+                      <div className="flex gap-3 mt-1.5 text-sm text-muted-foreground">
+                        <span>{Math.round(meal.calories * meal.servings)} cal</span>
+                        <span>{Math.round(meal.protein * meal.servings)}g protein</span>
+                      </div>
+                      {/* Contribution Badge */}
+                      {badge && (
+                        <span className="inline-block mt-2 text-xs px-3 py-1 rounded-full bg-[#f5f0e8] text-[#5c5a52] font-medium">
+                          {badge.text}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => swapMeal(selectedDay, mealIndex)}
+                        disabled={swapping === `${selectedDay}-${mealIndex}`}
+                        className="rounded-full h-8 w-8 p-0"
+                        data-testid={`swap-meal-${mealIndex}`}
+                      >
+                        {swapping === `${selectedDay}-${mealIndex}` ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Shuffle className="w-4 h-4" />
+                        )}
+                      </Button>
+                      <ChevronRight
+                        className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                        onClick={() => fetchRecipeDetails(meal.recipe_id)}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Contextual Guidance */}
+      {contextualGuidance.length > 0 && (
+        <Card className="rounded-2xl border-border bg-[#faf8f5]">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground">
+                {contextualGuidance[0].message}
+              </p>
             </div>
           </CardContent>
         </Card>
