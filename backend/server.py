@@ -940,7 +940,7 @@ SEED_RECIPES = [
         "cook_time": 10,
         "servings": 1,
         "tags": ["vegetarian", "gluten-free", "keto"],
-        "image_url": "https://images.unsplash.com/photo-1482049016gy-47b67d08bh89?w=400"
+        "image_url": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400"
     },
     # Lunch
     {
@@ -1149,7 +1149,7 @@ SEED_RECIPES = [
         "cook_time": 0,
         "servings": 1,
         "tags": ["vegetarian", "vegan", "gluten-free", "dairy-free", "paleo"],
-        "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2uj1c?w=400"
+        "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2ef1c?w=400"
     },
     {
         "name": "Hummus & Veggie Sticks",
