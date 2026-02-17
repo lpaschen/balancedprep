@@ -340,9 +340,20 @@ const MealPrep = () => {
 
       {/* Recipe Modal with Scaled Ingredients */}
       <Dialog open={recipeModalOpen} onOpenChange={setRecipeModalOpen}>
-        <DialogContent className="max-w-lg rounded-2xl p-0 max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-lg rounded-2xl p-0 max-h-[85vh] overflow-hidden flex flex-col">
           {selectedRecipeForModal && (
             <>
+              {/* Recipe Image */}
+              {selectedRecipeForModal.image_url && (
+                <div className="w-full h-40 overflow-hidden flex-shrink-0">
+                  <img 
+                    src={selectedRecipeForModal.image_url} 
+                    alt={selectedRecipeForModal.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+              )}
               <DialogHeader className="p-6 pb-0">
                 <DialogTitle className="text-xl">
                   {selectedRecipeForModal.name}
@@ -351,7 +362,7 @@ const MealPrep = () => {
                   </span>
                 </DialogTitle>
               </DialogHeader>
-              <ScrollArea className="flex-1 px-6 pb-6">
+              <ScrollArea className="flex-1 overflow-y-auto px-6 pb-6">
                 <div className="space-y-5 pt-4">
                   {/* Nutrition per serving */}
                   <div className="grid grid-cols-4 gap-3 text-center">
@@ -435,8 +446,8 @@ const MealPrepCard = ({ item, isExpanded, onToggle, onViewRecipe }) => {
   const smartNotes = recipe ? getSmartPrepNotes(recipe) : [];
   const storage = recipe ? getStorageGuidance(recipe) : null;
   
-  // Total portions should match frequency (times eaten)
-  const totalPortions = Math.ceil(item.total_servings);
+  // Total portions matches frequency (times eaten) - each appearance needs a portion
+  const totalPortions = item.frequency;
 
   return (
     <Card className="rounded-2xl border-border overflow-hidden">

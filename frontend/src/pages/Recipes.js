@@ -139,6 +139,17 @@ const Recipes = () => {
               onClick={() => openRecipeModal(recipe)}
               data-testid={`recipe-card-${recipe.id}`}
             >
+              {/* Recipe Image */}
+              {recipe.image_url && (
+                <div className="w-full h-36 overflow-hidden">
+                  <img 
+                    src={recipe.image_url} 
+                    alt={recipe.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+              )}
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold line-clamp-1">{recipe.name}</h3>
@@ -182,14 +193,25 @@ const Recipes = () => {
 
       {/* Recipe Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-lg rounded-2xl p-0 max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-lg rounded-2xl p-0 max-h-[85vh] overflow-hidden flex flex-col">
           {selectedRecipe && (
             <>
+              {/* Recipe Image */}
+              {selectedRecipe.image_url && (
+                <div className="w-full h-40 overflow-hidden flex-shrink-0">
+                  <img 
+                    src={selectedRecipe.image_url} 
+                    alt={selectedRecipe.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+              )}
               <DialogHeader className="p-6 pb-0">
                 <DialogTitle className="text-xl">{selectedRecipe.name}</DialogTitle>
                 <DialogDescription>{selectedRecipe.description}</DialogDescription>
               </DialogHeader>
-              <ScrollArea className="flex-1 px-6 pb-6">
+              <ScrollArea className="flex-1 overflow-y-auto px-6 pb-6">
                 <div className="space-y-5 pt-4">
                   {/* Nutrition Grid */}
                   <div className="grid grid-cols-4 gap-3 text-center">
