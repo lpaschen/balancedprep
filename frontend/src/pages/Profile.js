@@ -259,6 +259,14 @@ const Profile = () => {
         </Button>
         <Button
           variant="outline"
+          onClick={() => navigate('/onboarding')}
+          className="rounded-full px-8"
+          data-testid="redo-onboarding-btn"
+        >
+          Redo Setup
+        </Button>
+        <Button
+          variant="outline"
           onClick={handleLogout}
           className="rounded-full px-8"
           data-testid="profile-logout-btn"
