@@ -238,7 +238,10 @@ async def update_profile(data: UpdateTargets, user: dict = Depends(get_current_u
     update_data = {
         "targets": data.targets,
         "preferences": data.preferences,
+        "allergens": data.allergens,
         "prep_level": data.prep_level,
+        "auto_regenerate": data.auto_regenerate,
+        "regenerate_day": data.regenerate_day,
         "onboarding_complete": True
     }
     
