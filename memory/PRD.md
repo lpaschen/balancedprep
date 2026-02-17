@@ -128,9 +128,10 @@ Build a full-stack web app called BalancedPrep that turns a user's nutrition tar
 - [ ] Meal prep reminders/notifications
 
 ## Next Tasks
-1. Investigate "Regenerate day" functionality (user reported not working)
-2. Add printable meal prep checklist
-3. Add Sunday vs. Wednesday prep day recommendations
-4. Allow users to add custom items to grocery list
-5. Implement "share grocery list" feature
-6. Optimize N+1 query in grocery list generation
+1. Implement actual backend scheduling for weekly automation (currently UI-only)
+2. Investigate "Regenerate day" functionality (user reported not working)
+3. Add printable meal prep checklist
+4. Add Sunday vs. Wednesday prep day recommendations
+5. Allow users to add custom items to grocery list
+6. Implement "share grocery list" feature
+7. Optimize N+1 query in grocery list generation
