@@ -58,14 +58,20 @@ class UserProfile(BaseModel):
         "fat": None
     })
     preferences: List[str] = Field(default_factory=list)
-    prep_level: int = Field(default=3, ge=1, le=5)  # 1=low prep, 5=high prep
+    allergens: List[str] = Field(default_factory=list)  # nuts, shellfish, soy, dairy, eggs, gluten
+    prep_level: int = Field(default=3, ge=1, le=5)  # 1=batch, 3=balanced, 5=variety
+    auto_regenerate: bool = False
+    regenerate_day: Optional[str] = None  # monday, tuesday, etc.
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     onboarding_complete: bool = False
 
 class UpdateTargets(BaseModel):
     targets: Dict[str, Optional[float]]
     preferences: List[str] = []
+    allergens: List[str] = []
     prep_level: int = Field(default=3, ge=1, le=5)
+    auto_regenerate: bool = False
+    regenerate_day: Optional[str] = None
 
 class Recipe(BaseModel):
     model_config = ConfigDict(extra="ignore")
