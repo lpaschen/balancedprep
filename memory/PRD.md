@@ -73,20 +73,32 @@ Build a full-stack web app called BalancedPrep that turns a user's nutrition tar
 ### Frontend (React + Tailwind + Shadcn)
 - Landing page with "Nourished Earth" design theme
 - Registration and login forms
-- 3-step onboarding (targets → preferences → prep level)
+- **NEW: 6-step professional onboarding flow** (December 2025):
+  - Step 0: Professional positioning with value props
+  - Step 1: Macro targets with real-time summary panel
+  - Step 2: Food boundaries (dietary filters + allergens with live recipe pool count)
+  - Step 3: Efficiency mode slider (Batch/Balanced/Variety) with dynamic preview
+  - Step 4: Weekly automation preference (UI only, scheduling not implemented)
+  - Step 5: Plan generation with animated loading states
 - Dashboard with 7-day meal plan view
 - Day selector with on-target indicators
 - Nutrition summary per day with deltas
 - Swap meal and regenerate day buttons
-- Recipe detail modal
+- Recipe detail modal with images
 - Grocery list with category grouping and checkboxes
-- Recipes page with search and filter
+- Recipes page with search, filter, and recipe images
 - Add recipe form
-- Profile/settings page
+- Profile/settings page with "Redo Setup" button
 
 ### Dietary Preferences Supported
 - Vegetarian, Vegan, Gluten-free, Dairy-free
 - Keto, Paleo, Low-sodium, Nut-free
+- Kosher, Halal (coming soon - UI disabled)
+
+### Allergen Exclusions (NEW - December 2025)
+- Nuts, Shellfish, Soy, Dairy, Eggs, Gluten
+- Stored separately from dietary preferences
+- Hard exclusion based on ingredient matching
 
 ## Prioritized Backlog
 
