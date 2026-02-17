@@ -252,6 +252,62 @@ async def update_profile(data: UpdateTargets, user: dict = Depends(get_current_u
 
 # ============ RECIPE ROUTES ============
 
+# Allergen to ingredient mapping for filtering
+ALLERGEN_INGREDIENTS = {
+    "nuts": ["almond", "peanut", "walnut", "cashew", "nut", "pecan", "pistachio", "hazelnut"],
+    "shellfish": ["shrimp", "crab", "lobster", "shellfish", "mussel", "clam", "oyster"],
+    "soy": ["soy", "tofu", "tempeh", "edamame", "tamari", "miso"],
+    "dairy": ["milk", "cheese", "yogurt", "butter", "cream", "feta", "cheddar", "parmesan"],
+    "eggs": ["egg"],
+    "gluten": ["wheat", "bread", "pasta", "flour", "tortilla", "wrap", "farro", "barley", "rye"]
+}
+
+class RecipePoolRequest(BaseModel):
+    preferences: List[str] = []
+    allergens: List[str] = []
+
+@api_router.post("/recipes/pool-count")
+async def get_recipe_pool_count(request: RecipePoolRequest, user: dict = Depends(get_current_user)):
+    """Get count of available recipes based on dietary preferences and allergens."""
+    query = {"$or": [{"user_id": None}, {"user_id": user["id"]}]}
+    
+    # Apply dietary preference filters
+    if request.preferences:
+        query["tags"] = {"$all": request.preferences}
+    
+    # Get all matching recipes first
+    recipes = await db.recipes.find(query, {"_id": 0, "ingredients": 1, "tags": 1}).to_list(500)
+    
+    # Filter out recipes containing allergens
+    if request.allergens:
+        filtered_recipes = []
+        for recipe in recipes:
+            has_allergen = False
+            ingredients_text = " ".join([ing.get("name", "").lower() for ing in recipe.get("ingredients", [])])
+            
+            for allergen in request.allergens:
+                allergen_keywords = ALLERGEN_INGREDIENTS.get(allergen, [])
+                for keyword in allergen_keywords:
+                    if keyword in ingredients_text:
+                        has_allergen = True
+                        break
+                if has_allergen:
+                    break
+            
+            if not has_allergen:
+                filtered_recipes.append(recipe)
+        
+        recipes = filtered_recipes
+    
+    # Get total recipe count without filters for comparison
+    total_count = await db.recipes.count_documents({"$or": [{"user_id": None}, {"user_id": user["id"]}]})
+    
+    return {
+        "available_count": len(recipes),
+        "total_count": total_count,
+        "percentage": round((len(recipes) / total_count * 100) if total_count > 0 else 0)
+    }
+
 @api_router.get("/recipes", response_model=List[Recipe])
 async def get_recipes(meal_type: Optional[str] = None, user: dict = Depends(get_current_user)):
     query = {"$or": [{"user_id": None}, {"user_id": user["id"]}]}
