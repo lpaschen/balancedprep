@@ -654,6 +654,85 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Goals Modal */}
+      <Dialog open={editGoalsOpen} onOpenChange={setEditGoalsOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Macro Targets</DialogTitle>
+            <DialogDescription>
+              Update your daily nutrition goals. At least one target is required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-calories">Calories (kcal)</Label>
+              <Input
+                id="edit-calories"
+                type="number"
+                placeholder="e.g., 2000"
+                value={editingTargets.calories}
+                onChange={(e) => setEditingTargets(prev => ({ ...prev, calories: e.target.value }))}
+                className="h-11 rounded-xl"
+                data-testid="edit-calories-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-protein">Protein (g)</Label>
+              <Input
+                id="edit-protein"
+                type="number"
+                placeholder="e.g., 150"
+                value={editingTargets.protein}
+                onChange={(e) => setEditingTargets(prev => ({ ...prev, protein: e.target.value }))}
+                className="h-11 rounded-xl"
+                data-testid="edit-protein-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-carbs">Carbs (g)</Label>
+              <Input
+                id="edit-carbs"
+                type="number"
+                placeholder="e.g., 250"
+                value={editingTargets.carbs}
+                onChange={(e) => setEditingTargets(prev => ({ ...prev, carbs: e.target.value }))}
+                className="h-11 rounded-xl"
+                data-testid="edit-carbs-input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-fat">Fat (g)</Label>
+              <Input
+                id="edit-fat"
+                type="number"
+                placeholder="e.g., 65"
+                value={editingTargets.fat}
+                onChange={(e) => setEditingTargets(prev => ({ ...prev, fat: e.target.value }))}
+                className="h-11 rounded-xl"
+                data-testid="edit-fat-input"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => setEditGoalsOpen(false)}
+              className="rounded-full"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={saveGoals}
+              disabled={savingGoals}
+              className="rounded-full"
+              data-testid="save-goals-btn"
+            >
+              {savingGoals ? 'Saving...' : 'Save Goals'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
