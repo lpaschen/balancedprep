@@ -391,8 +391,9 @@ const Dashboard = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/onboarding')}
+            onClick={openEditGoals}
             className="rounded-full text-muted-foreground hover:text-foreground"
+            data-testid="edit-goals-btn"
           >
             <Settings className="w-4 h-4 mr-1.5" />
             Edit goals
@@ -411,61 +412,61 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Daily Progress Card */}
-      <Card className="rounded-2xl border-border">
-        <CardContent className="p-6">
-          <h2 className="text-lg font-semibold mb-5">Daily Progress</h2>
-          <div className="space-y-5">
+      {/* Compact Daily Progress */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 bg-secondary/30 rounded-xl">
+        {['calories', 'protein', 'carbs', 'fat'].map((key) => {
+          const target = user?.targets?.[key];
+          const total = currentDay.totals[key];
+          const isTracked = target !== null && target > 0;
+          const percentage = isTracked ? Math.min(100, (total / target) * 100) : 0;
+          const unit = key === 'calories' ? '' : 'g';
+          const displayName = key === 'calories' ? 'Cal' : key.charAt(0).toUpperCase() + key.slice(1);
+          
+          // Only show tracked macros prominently
+          if (!isTracked) return null;
+          
+          return (
+            <div key={key} className="flex items-center gap-2">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {displayName}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      percentage >= 90 ? 'bg-primary' : 'bg-primary/60'
+                    }`}
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+                <span className="text-xs font-semibold tabular-nums">
+                  {Math.round(total)}/{Math.round(target)}{unit}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {/* Show untracked totals in muted style */}
+        {['calories', 'protein', 'carbs', 'fat'].filter(key => {
+          const target = user?.targets?.[key];
+          return !(target !== null && target > 0);
+        }).length > 0 && (
+          <div className="flex items-center gap-3 ml-auto text-xs text-muted-foreground">
             {['calories', 'protein', 'carbs', 'fat'].map((key) => {
               const target = user?.targets?.[key];
               const total = currentDay.totals[key];
               const isTracked = target !== null && target > 0;
-              const remaining = isTracked ? Math.max(0, target - total) : 0;
-              const percentage = isTracked ? Math.min(100, (total / target) * 100) : 0;
-              const unit = key === 'calories' ? 'cal' : 'g';
-              
-              // Color classes based on macro type
-              const barColor = key === 'calories' ? 'bg-[#5a8a5a]' : 
-                              key === 'protein' ? 'bg-[#5a8a5a]' : 
-                              'bg-[#c9c4b8]';
-
+              if (isTracked) return null;
+              const unit = key === 'calories' ? ' cal' : 'g';
               return (
-                <div key={key} className={isTracked ? '' : 'opacity-60'}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-sm font-medium capitalize ${isTracked ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </span>
-                    <div className="text-right">
-                      {isTracked ? (
-                        <>
-                          <span className="text-sm font-semibold">
-                            {Math.round(total)} / {Math.round(target)} {unit}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            {Math.round(remaining)} remaining
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-sm text-muted-foreground italic">No goal set</span>
-                          <span className="text-sm font-medium ml-2">{Math.round(total)}{unit}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {/* Progress Bar */}
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-                      style={{ width: isTracked ? `${percentage}%` : '100%' }}
-                    />
-                  </div>
-                </div>
+                <span key={key}>
+                  {Math.round(total)}{unit} {key !== 'calories' ? key : ''}
+                </span>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Today's Meals */}
       <div>
