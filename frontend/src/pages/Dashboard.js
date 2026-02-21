@@ -99,7 +99,7 @@ const getContextualGuidance = (currentDay, userTargets) => {
 };
 
 const Dashboard = () => {
-  const { token, user } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [mealPlan, setMealPlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -108,6 +108,68 @@ const Dashboard = () => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [recipeModalOpen, setRecipeModalOpen] = useState(false);
   const [swapping, setSwapping] = useState(null);
+  
+  // Edit Goals Modal State
+  const [editGoalsOpen, setEditGoalsOpen] = useState(false);
+  const [editingTargets, setEditingTargets] = useState({
+    calories: '',
+    protein: '',
+    carbs: '',
+    fat: ''
+  });
+  const [savingGoals, setSavingGoals] = useState(false);
+
+  // Initialize editing targets when modal opens
+  const openEditGoals = () => {
+    setEditingTargets({
+      calories: user?.targets?.calories || '',
+      protein: user?.targets?.protein || '',
+      carbs: user?.targets?.carbs || '',
+      fat: user?.targets?.fat || ''
+    });
+    setEditGoalsOpen(true);
+  };
+
+  const saveGoals = async () => {
+    // Validate at least one target
+    const hasTarget = Object.values(editingTargets).some(v => v !== '' && parseFloat(v) > 0);
+    if (!hasTarget) {
+      toast.error('Please set at least one macro target');
+      return;
+    }
+
+    setSavingGoals(true);
+    try {
+      const targets = {
+        calories: editingTargets.calories ? parseFloat(editingTargets.calories) : null,
+        protein: editingTargets.protein ? parseFloat(editingTargets.protein) : null,
+        carbs: editingTargets.carbs ? parseFloat(editingTargets.carbs) : null,
+        fat: editingTargets.fat ? parseFloat(editingTargets.fat) : null,
+      };
+
+      const response = await axios.put(
+        `${API}/user/profile`,
+        {
+          targets,
+          preferences: user?.preferences || [],
+          allergens: user?.allergens || [],
+          prep_level: user?.prep_level || 3,
+          auto_regenerate: user?.auto_regenerate || false,
+          regenerate_day: user?.regenerate_day || null,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      updateUser(response.data);
+      setEditGoalsOpen(false);
+      toast.success('Goals updated!');
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Failed to save goals';
+      toast.error(message);
+    } finally {
+      setSavingGoals(false);
+    }
+  };
 
   const fetchMealPlan = useCallback(async () => {
     try {
