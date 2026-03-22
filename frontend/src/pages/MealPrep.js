@@ -24,14 +24,6 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Prep difficulty based on total time
-const getPrepDifficulty = (prepTime, cookTime) => {
-  const total = (prepTime || 0) + (cookTime || 0);
-  if (total <= 15) return { label: 'Quick', color: 'text-green-600 bg-green-100' };
-  if (total <= 35) return { label: 'Moderate', color: 'text-amber-600 bg-amber-100' };
-  return { label: 'Longer', color: 'text-red-600 bg-red-100' };
-};
-
 // Smart prep notes based on recipe characteristics
 const getSmartPrepNotes = (recipe) => {
   const notes = [];
@@ -442,16 +434,27 @@ const MealPrep = () => {
 // Detailed card for prep items
 const MealPrepCard = ({ item, isExpanded, onToggle, onViewRecipe }) => {
   const recipe = item.recipe;
-  const difficulty = recipe ? getPrepDifficulty(recipe.prep_time, recipe.cook_time) : null;
   const smartNotes = recipe ? getSmartPrepNotes(recipe) : [];
   const storage = recipe ? getStorageGuidance(recipe) : null;
-  
-  // Total portions matches frequency (times eaten) - each appearance needs a portion
-  const totalPortions = item.frequency;
+
+  // Total servings needed = sum of (servings × each appearance)
+  const totalServings = Math.ceil(item.total_servings * 2) / 2; // round to nearest 0.5
+  const servingsPerMeal = (item.total_servings / item.frequency).toFixed(2).replace(/\.?0+$/, '');
 
   return (
     <Card className="rounded-2xl border-border overflow-hidden">
       <CardContent className="p-0">
+        {/* Recipe image */}
+        {recipe?.image_url && (
+          <div className="w-full h-36 overflow-hidden cursor-pointer" onClick={onViewRecipe}>
+            <img
+              src={recipe.image_url}
+              alt={item.recipe_name}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+            />
+          </div>
+        )}
         <div className="p-5">
           {/* Header */}
           <div className="flex items-start justify-between gap-4 mb-3">
@@ -462,29 +465,20 @@ const MealPrepCard = ({ item, isExpanded, onToggle, onViewRecipe }) => {
                     {type}
                   </span>
                 ))}
-                {difficulty && (
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${difficulty.color}`}>
-                    {difficulty.label}
-                  </span>
-                )}
               </div>
-              <h3 
+              <h3
                 className="font-semibold text-lg cursor-pointer hover:text-primary transition-colors"
                 onClick={onViewRecipe}
               >
                 {item.recipe_name}
               </h3>
             </div>
-            <div className="text-right flex-shrink-0">
-              <div className="text-2xl font-bold text-primary">{item.frequency}x</div>
-              <div className="text-xs text-muted-foreground">this week</div>
-            </div>
           </div>
 
-          {/* When it appears - just days, no meal type letter */}
+          {/* When it appears */}
           <div className="flex flex-wrap gap-1.5 mb-4">
             {item.appearances.map((app, i) => (
-              <span 
+              <span
                 key={i}
                 className="text-xs px-2.5 py-1 rounded-lg bg-accent border border-border"
               >
@@ -493,21 +487,26 @@ const MealPrepCard = ({ item, isExpanded, onToggle, onViewRecipe }) => {
             ))}
           </div>
 
-          {/* Cook amount - matches frequency */}
-          <div 
+          {/* Cook amount - accurate total servings */}
+          <div
             className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 mb-4 cursor-pointer hover:bg-primary/10 transition-colors"
             onClick={onViewRecipe}
           >
             <ChefHat className="w-5 h-5 text-primary" />
-            <span className="font-medium">
-              Cook {totalPortions} portions
-            </span>
-            {recipe && (
-              <span className="text-muted-foreground text-sm">
-                • {recipe.prep_time + recipe.cook_time} min
+            <div className="flex-1">
+              <span className="font-medium">
+                Cook {totalServings} servings total
               </span>
-            )}
-            <span className="text-primary text-sm ml-auto">View recipe →</span>
+              <span className="text-muted-foreground text-sm">
+                {' '}· {item.frequency}× this week, {servingsPerMeal} servings each
+              </span>
+              {recipe && (
+                <span className="text-muted-foreground text-sm">
+                  {' '}· {recipe.prep_time + recipe.cook_time} min
+                </span>
+              )}
+            </div>
+            <span className="text-primary text-sm ml-auto flex-shrink-0">View recipe →</span>
           </div>
 
           {/* Expandable section */}
@@ -563,33 +562,39 @@ const MealPrepCard = ({ item, isExpanded, onToggle, onViewRecipe }) => {
 // Compact card for single-use items
 const MealPrepCardCompact = ({ item, onViewRecipe }) => {
   const recipe = item.recipe;
-  const difficulty = recipe ? getPrepDifficulty(recipe.prep_time, recipe.cook_time) : null;
 
   return (
-    <Card className="rounded-xl border-border hover:border-primary/30 transition-colors cursor-pointer" onClick={onViewRecipe}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h4 className="font-medium truncate">{item.recipe_name}</h4>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs text-muted-foreground">
-                {item.appearances[0]?.day} • {item.appearances[0]?.meal_type}
-              </span>
-              {difficulty && (
-                <span className={`text-xs px-1.5 py-0.5 rounded ${difficulty.color}`}>
-                  {difficulty.label}
-                </span>
-              )}
-            </div>
+    <Card className="rounded-xl border-border hover:border-primary/30 transition-colors cursor-pointer overflow-hidden" onClick={onViewRecipe}>
+      <div className="flex items-stretch">
+        {recipe?.image_url && (
+          <div className="w-20 flex-shrink-0 overflow-hidden">
+            <img
+              src={recipe.image_url}
+              alt={item.recipe_name}
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+            />
           </div>
-          {recipe && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3.5 h-3.5" />
-              {recipe.prep_time + recipe.cook_time}m
+        )}
+        <CardContent className="p-4 flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h4 className="font-medium truncate">{item.recipe_name}</h4>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-muted-foreground capitalize">
+                  {item.appearances[0]?.meal_type} · {item.appearances[0]?.day} · {item.total_servings} servings
+                </span>
+              </div>
             </div>
-          )}
-        </div>
-      </CardContent>
+            {recipe && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                <Clock className="w-3.5 h-3.5" />
+                {recipe.prep_time + recipe.cook_time}m
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </div>
     </Card>
   );
 };

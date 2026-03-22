@@ -13,6 +13,27 @@ from datetime import datetime, timezone, timedelta
 import jwt
 import bcrypt
 import random
+import urllib.request
+import urllib.parse
+import json
+import re
+from html.parser import HTMLParser
+
+class _HTMLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self._parts = []
+    def handle_data(self, data):
+        self._parts.append(data)
+    def get_text(self):
+        return ' '.join(self._parts).strip()
+
+def strip_html(text: str) -> str:
+    if not text:
+        return ""
+    s = _HTMLStripper()
+    s.feed(text)
+    return re.sub(r'\s+', ' ', s.get_text()).strip()
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -26,6 +47,8 @@ db = client[os.environ['DB_NAME']]
 JWT_SECRET = os.environ.get('JWT_SECRET', 'balanced-prep-secret-key-2025')
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
+
+SPOONACULAR_API_KEY = os.environ.get('SPOONACULAR_API_KEY', '')
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -51,6 +74,7 @@ class UserProfile(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
     name: str
+    is_admin: bool = False
     targets: Dict[str, Optional[float]] = Field(default_factory=lambda: {
         "calories": None,
         "protein": None,
@@ -118,6 +142,8 @@ class MealSlot(BaseModel):
     protein: float
     carbs: float
     fat: float
+    image_url: str = ""
+    tags: List[str] = []
 
 class DayPlan(BaseModel):
     day: str  # Monday, Tuesday, etc.
@@ -156,6 +182,11 @@ class GroceryList(BaseModel):
 class SwapMealRequest(BaseModel):
     day_index: int
     meal_index: int
+
+class AssignMealRequest(BaseModel):
+    day_index: int
+    meal_index: int
+    recipe_id: str
 
 class RegenerateDayRequest(BaseModel):
     day_index: int
@@ -508,7 +539,9 @@ async def generate_day_plan(
                 calories=recipe["calories"],
                 protein=recipe["protein"],
                 carbs=recipe["carbs"],
-                fat=recipe["fat"]
+                fat=recipe["fat"],
+                image_url=recipe.get("image_url", ""),
+                tags=recipe.get("tags", [])
             ))
             
             # Update running totals for next meal selection
@@ -618,6 +651,20 @@ async def get_meal_plan(user: dict = Depends(get_current_user)):
     plan = await db.meal_plans.find_one({"user_id": user["id"]}, {"_id": 0})
     if not plan:
         raise HTTPException(status_code=404, detail="No meal plan found. Generate one first.")
+
+    # Backfill image_url for meals that don't have it yet
+    all_recipe_ids = list({m["recipe_id"] for d in plan["days"] for m in d["meals"]})
+    recipes_with_images = await db.recipes.find(
+        {"id": {"$in": all_recipe_ids}},
+        {"_id": 0, "id": 1, "image_url": 1}
+    ).to_list(100)
+    image_map = {r["id"]: r.get("image_url", "") for r in recipes_with_images}
+
+    for day in plan["days"]:
+        for meal in day["meals"]:
+            if not meal.get("image_url"):
+                meal["image_url"] = image_map.get(meal["recipe_id"], "")
+
     return plan
 
 @api_router.put("/meal-plan/swap-meal")
@@ -676,7 +723,9 @@ async def swap_meal(request: SwapMealRequest, user: dict = Depends(get_current_u
         "calories": new_recipe["calories"],
         "protein": new_recipe["protein"],
         "carbs": new_recipe["carbs"],
-        "fat": new_recipe["fat"]
+        "fat": new_recipe["fat"],
+        "image_url": new_recipe.get("image_url", ""),
+        "tags": new_recipe.get("tags", [])
     }
     
     # Recalculate day totals
@@ -702,6 +751,70 @@ async def swap_meal(request: SwapMealRequest, user: dict = Depends(get_current_u
     await generate_grocery_list(user["id"], MealPlan(**{k: v for k, v in plan.items() if k != "_id"}))
     
     return {k: v for k, v in plan.items() if k != "_id"}
+
+@api_router.put("/meal-plan/assign-meal")
+async def assign_meal(request: AssignMealRequest, user: dict = Depends(get_current_user)):
+    """Assign a specific recipe to a meal slot."""
+    plan = await db.meal_plans.find_one({"user_id": user["id"]})
+    if not plan:
+        raise HTTPException(status_code=404, detail="No meal plan found")
+
+    if request.day_index < 0 or request.day_index >= len(plan["days"]):
+        raise HTTPException(status_code=400, detail="Invalid day index")
+
+    day = plan["days"][request.day_index]
+    if request.meal_index < 0 or request.meal_index >= len(day["meals"]):
+        raise HTTPException(status_code=400, detail="Invalid meal index")
+
+    recipe = await db.recipes.find_one(
+        {"id": request.recipe_id, "$or": [{"user_id": None}, {"user_id": user["id"]}]},
+        {"_id": 0}
+    )
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    old_meal = day["meals"][request.meal_index]
+    meal_type = old_meal["meal_type"]
+
+    # Calculate servings based on calorie target
+    targets = user.get("targets", {})
+    serving = 1.0
+    if targets.get("calories") and targets["calories"] > 0:
+        meal_fraction = 0.25 if meal_type in ["breakfast", "lunch", "dinner"] else 0.125
+        target_calories = targets["calories"] * meal_fraction
+        if recipe["calories"] > 0:
+            ideal = target_calories / recipe["calories"]
+            serving = max(0.5, min(2.0, round(ideal * 2) / 2))
+
+    day["meals"][request.meal_index] = {
+        "meal_type": meal_type,
+        "recipe_id": recipe["id"],
+        "recipe_name": recipe["name"],
+        "servings": serving,
+        "calories": recipe["calories"],
+        "protein": recipe["protein"],
+        "carbs": recipe["carbs"],
+        "fat": recipe["fat"],
+        "image_url": recipe.get("image_url", ""),
+        "tags": recipe.get("tags", []),
+    }
+
+    meals = [MealSlot(**m) for m in day["meals"]]
+    totals = calculate_day_totals(meals)
+    deltas = calculate_deltas(totals, targets)
+    on_target = check_on_target(totals, targets, TOLERANCE_PERCENT)
+    day["totals"] = totals
+    day["deltas"] = deltas
+    day["on_target"] = on_target
+
+    all_recipe_ids = {m["recipe_id"] for d in plan["days"] for m in d["meals"]}
+    plan["unique_meals_count"] = len(all_recipe_ids)
+
+    await db.meal_plans.update_one({"id": plan["id"]}, {"$set": plan})
+    await generate_grocery_list(user["id"], MealPlan(**{k: v for k, v in plan.items() if k != "_id"}))
+
+    return {k: v for k, v in plan.items() if k != "_id"}
+
 
 @api_router.put("/meal-plan/regenerate-day")
 async def regenerate_day(request: RegenerateDayRequest, user: dict = Depends(get_current_user)):
@@ -1851,6 +1964,224 @@ async def seed_recipes():
         await db.recipes.insert_one(recipe.model_dump())
     
     return {"message": f"Seeded {len(SEED_RECIPES)} recipes"}
+
+# ============ ADMIN DEPENDENCY ============
+
+async def get_current_admin(user: dict = Depends(get_current_user)) -> dict:
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+# ============ SPOONACULAR ROUTES ============
+
+# Map Spoonacular dish types to our meal_type values
+SPOONACULAR_MEAL_TYPE_MAP = {
+    "breakfast": "breakfast",
+    "morning meal": "breakfast",
+    "brunch": "breakfast",
+    "lunch": "lunch",
+    "salad": "lunch",
+    "soup": "lunch",
+    "dinner": "dinner",
+    "main course": "dinner",
+    "main dish": "dinner",
+    "snack": "snack",
+    "appetizer": "snack",
+    "side dish": "snack",
+    "dessert": "snack",
+}
+
+# Map Spoonacular diets to our tags
+SPOONACULAR_DIET_MAP = {
+    "vegan": "vegan",
+    "vegetarian": "vegetarian",
+    "gluten free": "gluten-free",
+    "dairy free": "dairy-free",
+    "ketogenic": "keto",
+    "paleo": "paleo",
+    "low fodmap": "low-sodium",
+}
+
+def _spoonacular_request(url: str) -> dict:
+    req = urllib.request.Request(url, headers={"User-Agent": "BalancedPrep/1.0"})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        return json.loads(resp.read().decode())
+
+def _infer_meal_type(dish_types: list, hint: str = "") -> str:
+    for dt in (dish_types or []):
+        mapped = SPOONACULAR_MEAL_TYPE_MAP.get(dt.lower())
+        if mapped:
+            return mapped
+    if hint:
+        return hint
+    return "dinner"
+
+def _map_tags(diets: list) -> list:
+    tags = []
+    for d in (diets or []):
+        mapped = SPOONACULAR_DIET_MAP.get(d.lower())
+        if mapped and mapped not in tags:
+            tags.append(mapped)
+    return tags
+
+def _get_nutrient(nutrients: list, name: str) -> float:
+    for n in nutrients:
+        if n.get("name", "").lower() == name.lower():
+            return round(n.get("amount", 0), 1)
+    return 0.0
+
+@api_router.get("/spoonacular/search")
+async def spoonacular_search(
+    query: str,
+    meal_type: str = "",
+    number: int = 12,
+    user: dict = Depends(get_current_user)
+):
+    """Search Spoonacular recipes. Available to all users."""
+    if not SPOONACULAR_API_KEY:
+        raise HTTPException(status_code=503, detail="Spoonacular API key not configured")
+
+    params = {
+        "apiKey": SPOONACULAR_API_KEY,
+        "query": query,
+        "number": number,
+        "addRecipeNutrition": "true",
+        "fillIngredients": "false",
+        "instructionsRequired": "true",
+    }
+    if meal_type and meal_type != "all":
+        params["type"] = meal_type
+
+    url = "https://api.spoonacular.com/recipes/complexSearch?" + urllib.parse.urlencode(params)
+    try:
+        data = _spoonacular_request(url)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Spoonacular error: {str(e)}")
+
+    # Get IDs already imported to mark duplicates
+    existing = await db.recipes.find(
+        {"spoonacular_id": {"$exists": True}},
+        {"_id": 0, "spoonacular_id": 1}
+    ).to_list(1000)
+    imported_ids = {r["spoonacular_id"] for r in existing}
+
+    results = []
+    for r in data.get("results", []):
+        nutrition = r.get("nutrition", {})
+        nutrients = nutrition.get("nutrients", [])
+        dish_types = r.get("dishTypes", [])
+        inferred_meal_type = _infer_meal_type(dish_types, meal_type)
+
+        results.append({
+            "spoonacular_id": r["id"],
+            "name": r["title"],
+            "image_url": r.get("image", ""),
+            "meal_type": inferred_meal_type,
+            "calories": _get_nutrient(nutrients, "Calories"),
+            "protein": _get_nutrient(nutrients, "Protein"),
+            "carbs": _get_nutrient(nutrients, "Carbohydrates"),
+            "fat": _get_nutrient(nutrients, "Fat"),
+            "ready_in_minutes": r.get("readyInMinutes", 30),
+            "servings": r.get("servings", 1),
+            "already_imported": r["id"] in imported_ids,
+        })
+
+    return {"results": results, "total": data.get("totalResults", 0)}
+
+
+@api_router.post("/spoonacular/import/{spoonacular_id}")
+async def spoonacular_import(
+    spoonacular_id: int,
+    meal_type: str = "",
+    user: dict = Depends(get_current_user)
+):
+    """
+    Import a Spoonacular recipe.
+    - Admins: saved globally (user_id=None), available to all meal plans.
+    - Regular users: saved to their account only.
+    """
+    if not SPOONACULAR_API_KEY:
+        raise HTTPException(status_code=503, detail="Spoonacular API key not configured")
+
+    # Check for duplicate (same spoonacular_id for same scope)
+    scope_query = {"spoonacular_id": spoonacular_id}
+    if not user.get("is_admin"):
+        scope_query["user_id"] = user["id"]
+    existing = await db.recipes.find_one(scope_query)
+    if existing:
+        raise HTTPException(status_code=409, detail="Recipe already imported")
+
+    url = (
+        f"https://api.spoonacular.com/recipes/{spoonacular_id}/information"
+        f"?apiKey={SPOONACULAR_API_KEY}&includeNutrition=true"
+    )
+    try:
+        r = _spoonacular_request(url)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Spoonacular error: {str(e)}")
+
+    # Nutrition
+    nutrients = r.get("nutrition", {}).get("nutrients", [])
+    calories = _get_nutrient(nutrients, "Calories")
+    protein = _get_nutrient(nutrients, "Protein")
+    carbs = _get_nutrient(nutrients, "Carbohydrates")
+    fat = _get_nutrient(nutrients, "Fat")
+
+    # Meal type
+    inferred_meal_type = _infer_meal_type(r.get("dishTypes", []), meal_type)
+
+    # Ingredients
+    ingredients = []
+    for ing in r.get("extendedIngredients", []):
+        ingredients.append({
+            "name": ing.get("name", ""),
+            "quantity": ing.get("amount", 0),
+            "unit": ing.get("unit", ""),
+            "category": ing.get("aisle", ""),
+        })
+
+    # Instructions
+    instructions = []
+    for section in r.get("analyzedInstructions", []):
+        for step in section.get("steps", []):
+            instructions.append(step.get("step", ""))
+
+    # Tags from diets
+    tags = _map_tags(r.get("diets", []))
+
+    # Prep/cook time split
+    ready_in = r.get("readyInMinutes", 30)
+    prep_time = min(15, ready_in // 2)
+    cook_time = ready_in - prep_time
+
+    recipe = Recipe(
+        name=r["title"],
+        description=strip_html(r.get("summary", "")).split(".")[0][:200] + "." if r.get("summary") else "",
+        meal_type=inferred_meal_type,
+        calories=calories,
+        protein=protein,
+        carbs=carbs,
+        fat=fat,
+        ingredients=ingredients,
+        instructions=instructions,
+        prep_time=prep_time,
+        cook_time=cook_time,
+        servings=r.get("servings", 1),
+        image_url=r.get("image", ""),
+        tags=tags,
+        user_id=None if user.get("is_admin") else user["id"],
+    )
+
+    recipe_dict = recipe.model_dump()
+    recipe_dict["spoonacular_id"] = spoonacular_id
+    await db.recipes.insert_one(recipe_dict)
+
+    return {
+        "message": "Recipe imported successfully",
+        "recipe_id": recipe.id,
+        "global": user.get("is_admin"),
+    }
+
 
 @api_router.get("/")
 async def root():

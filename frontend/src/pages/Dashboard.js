@@ -12,6 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../components/ui/tooltip';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -39,6 +45,14 @@ const formatShortDate = (dateStr) => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+
+// Visual config per meal type
+const MEAL_VISUALS = {
+  breakfast: { emoji: '🍳', gradient: 'from-amber-100 to-orange-100' },
+  lunch:     { emoji: '🥗', gradient: 'from-emerald-100 to-teal-100' },
+  dinner:    { emoji: '🍽️', gradient: 'from-indigo-100 to-purple-100' },
+  snack:     { emoji: '🍎', gradient: 'from-rose-100 to-pink-100' },
 };
 
 // Helper to generate meal contribution badge
@@ -331,38 +345,62 @@ const Dashboard = () => {
     <div className="space-y-6 animate-fade-in" data-testid="dashboard">
       {/* Day Selector - Full Width Tabs */}
       <div className="w-full">
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 bg-secondary/50 rounded-2xl">
-          {mealPlan.days.map((day, index) => {
-            const allOnTarget = Object.values(day.on_target).every((v) => v);
-            const isSelected = selectedDay === index;
-            return (
-              <button
-                key={day.day}
-                onClick={() => setSelectedDay(index)}
-                className={`relative flex flex-col items-center py-3 sm:py-4 rounded-xl transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-card shadow-sm'
-                    : 'hover:bg-card/50'
-                }`}
-                data-testid={`day-selector-${index}`}
-              >
-                <span className={`text-xs sm:text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
-                  {DAYS_SHORT[index]}
-                </span>
-                <div className="flex items-center justify-center mt-1">
-                  {allOnTarget ? (
-                    <Check className={`w-3.5 h-3.5 ${isSelected ? 'text-primary' : 'text-primary/60'}`} />
-                  ) : (
-                    <AlertCircle className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-500' : 'text-amber-400/60'}`} />
-                  )}
-                </div>
-                {isSelected && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <TooltipProvider delayDuration={300}>
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 p-1 bg-secondary/50 rounded-2xl">
+            {mealPlan.days.map((day, index) => {
+              const allOnTarget = Object.values(day.on_target).every((v) => v);
+              const isSelected = selectedDay === index;
+              return (
+                <Tooltip key={day.day}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setSelectedDay(index)}
+                      className={`relative flex flex-col items-center py-3 sm:py-4 rounded-xl transition-all duration-200 ${
+                        isSelected ? 'bg-card shadow-sm' : 'hover:bg-card/50'
+                      }`}
+                      data-testid={`day-selector-${index}`}
+                    >
+                      <span className={`text-xs sm:text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {DAYS_SHORT[index]}
+                      </span>
+                      <div className="flex items-center justify-center mt-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          allOnTarget
+                            ? isSelected ? 'bg-primary' : 'bg-primary/50'
+                            : isSelected ? 'bg-amber-500' : 'bg-amber-400/50'
+                        }`} />
+                      </div>
+                      {isSelected && (
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-card text-foreground border border-border shadow-md rounded-xl p-3 text-left">
+                    <p className="text-xs font-semibold mb-1.5">{DAYS_FULL[index]}</p>
+                    <div className="space-y-1">
+                      {['calories', 'protein', 'carbs', 'fat'].map((key) => {
+                        const target = user?.targets?.[key];
+                        const total = day.totals[key];
+                        const isTracked = target !== null && target > 0;
+                        const pct = isTracked ? Math.min(100, Math.round((total / target) * 100)) : null;
+                        const unit = key === 'calories' ? ' cal' : 'g';
+                        return (
+                          <div key={key} className="flex items-center justify-between gap-4 text-xs">
+                            <span className="text-muted-foreground capitalize">{key}</span>
+                            <span className={`font-medium tabular-nums ${isTracked ? (pct >= 90 ? 'text-primary' : 'text-amber-500') : 'text-muted-foreground'}`}>
+                              {Math.round(total)}{unit}
+                              {isTracked && <span className="text-muted-foreground font-normal"> /{Math.round(target)}{unit}</span>}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </TooltipProvider>
       </div>
 
       {/* Day Header with Goals and Actions */}
@@ -374,15 +412,18 @@ const Dashboard = () => {
           </h1>
           {/* Goal Badges */}
           {goalBadges.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {goalBadges.map((badge) => (
-                <span
-                  key={badge.key}
-                  className="px-3 py-1 text-sm font-medium rounded-full bg-[#f5f0e8] text-[#5c5a52]"
-                >
-                  {badge.label}
-                </span>
-              ))}
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">Daily targets</p>
+              <div className="flex flex-wrap gap-2">
+                {goalBadges.map((badge) => (
+                  <span
+                    key={badge.key}
+                    className="px-3 py-1 text-sm font-medium rounded-full bg-[#f5f0e8] text-[#5c5a52]"
+                  >
+                    {badge.label}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -412,60 +453,62 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Compact Daily Progress */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 bg-secondary/30 rounded-xl">
+      {/* Daily Progress */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {['calories', 'protein', 'carbs', 'fat'].map((key) => {
           const target = user?.targets?.[key];
           const total = currentDay.totals[key];
           const isTracked = target !== null && target > 0;
           const percentage = isTracked ? Math.min(100, (total / target) * 100) : 0;
-          const unit = key === 'calories' ? '' : 'g';
-          const displayName = key === 'calories' ? 'Cal' : key.charAt(0).toUpperCase() + key.slice(1);
-          
-          // Only show tracked macros prominently
-          if (!isTracked) return null;
-          
+          const unit = key === 'calories' ? ' cal' : 'g';
+          const displayName = key.charAt(0).toUpperCase() + key.slice(1);
+          const onTarget = isTracked && percentage >= 90;
+          const underTarget = isTracked && percentage < 90;
+
           return (
-            <div key={key} className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {displayName}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <div className="w-16 h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div key={key} className="px-4 py-3 bg-secondary/30 rounded-xl">
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {displayName}
+                </span>
+                {isTracked && (
+                  <span className={`text-xs font-medium ${onTarget ? 'text-primary' : 'text-amber-500'}`}>
+                    {Math.round(percentage)}%
+                  </span>
+                )}
+                {!isTracked && (
+                  <span className="text-xs text-muted-foreground/50">no target</span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-xl font-bold tabular-nums text-foreground">
+                  {Math.round(total)}
+                </span>
+                {isTracked && (
+                  <span className="text-sm text-muted-foreground tabular-nums">
+                    /{Math.round(target)}{unit}
+                  </span>
+                )}
+                {!isTracked && (
+                  <span className="text-sm text-muted-foreground">{unit}</span>
+                )}
+              </div>
+              {isTracked && (
+                <div className="h-2 rounded-full bg-secondary overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      percentage >= 90 ? 'bg-primary' : 'bg-primary/60'
+                      onTarget ? 'bg-primary' : 'bg-amber-400'
                     }`}
-                    style={{ width: `${percentage}%` }}
+                    style={{ width: `${Math.min(100, percentage)}%` }}
                   />
                 </div>
-                <span className="text-xs font-semibold tabular-nums">
-                  {Math.round(total)}/{Math.round(target)}{unit}
-                </span>
-              </div>
+              )}
+              {!isTracked && (
+                <div className="h-2 rounded-full bg-secondary/50" />
+              )}
             </div>
           );
         })}
-        {/* Show untracked totals in muted style */}
-        {['calories', 'protein', 'carbs', 'fat'].filter(key => {
-          const target = user?.targets?.[key];
-          return !(target !== null && target > 0);
-        }).length > 0 && (
-          <div className="flex items-center gap-3 ml-auto text-xs text-muted-foreground">
-            {['calories', 'protein', 'carbs', 'fat'].map((key) => {
-              const target = user?.targets?.[key];
-              const total = currentDay.totals[key];
-              const isTracked = target !== null && target > 0;
-              if (isTracked) return null;
-              const unit = key === 'calories' ? ' cal' : 'g';
-              return (
-                <span key={key}>
-                  {Math.round(total)}{unit} {key !== 'calories' ? key : ''}
-                </span>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Today's Meals */}
@@ -474,25 +517,44 @@ const Dashboard = () => {
         <div className="space-y-3 stagger-children">
           {currentDay.meals.map((meal, mealIndex) => {
             const badge = getMealBadge(meal, currentDay.totals, user?.targets);
-            
+            const visual = MEAL_VISUALS[meal.meal_type] || MEAL_VISUALS.snack;
+            const isSwapping = swapping === `${selectedDay}-${mealIndex}`;
+
             return (
               <Card
                 key={`${meal.meal_type}-${mealIndex}`}
-                className="rounded-2xl border-border hover:shadow-sm transition-shadow"
+                className="rounded-2xl border-border hover:shadow-sm transition-shadow overflow-hidden"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
+                <CardContent className="p-0">
+                  <div className="flex items-stretch gap-0">
+                    {/* Visual tile */}
+                    <button
+                      onClick={() => fetchRecipeDetails(meal.recipe_id)}
+                      className={`flex-shrink-0 w-24 flex flex-col items-center justify-center bg-gradient-to-br ${visual.gradient} hover:opacity-90 transition-opacity`}
+                      aria-label={`View ${meal.recipe_name} recipe`}
+                    >
+                      {meal.image_url ? (
+                        <img src={meal.image_url} alt={meal.recipe_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-3xl">{visual.emoji}</span>
+                      )}
+                    </button>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 p-4">
+                      {/* Meal type + servings label */}
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
                           {meal.meal_type}
                         </span>
                         {meal.servings !== 1 && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary font-medium">
-                            {meal.servings}x
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary font-medium text-muted-foreground">
+                            {meal.servings} {meal.servings === 1 ? 'serving' : 'servings'}
                           </span>
                         )}
                       </div>
+
+                      {/* Recipe name */}
                       <button
                         onClick={() => fetchRecipeDetails(meal.recipe_id)}
                         className="text-left font-semibold hover:text-primary transition-colors truncate block w-full"
@@ -500,10 +562,15 @@ const Dashboard = () => {
                       >
                         {meal.recipe_name}
                       </button>
-                      <div className="flex gap-3 mt-1.5 text-sm text-muted-foreground">
-                        <span>{Math.round(meal.calories * meal.servings)} cal</span>
+
+                      {/* Macros row */}
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">{Math.round(meal.calories * meal.servings)} cal</span>
                         <span>{Math.round(meal.protein * meal.servings)}g protein</span>
+                        <span>{Math.round(meal.carbs * meal.servings)}g carbs</span>
+                        <span>{Math.round(meal.fat * meal.servings)}g fat</span>
                       </div>
+
                       {/* Contribution Badge */}
                       {badge && (
                         <span className="inline-block mt-2 text-xs px-3 py-1 rounded-full bg-[#f5f0e8] text-[#5c5a52] font-medium">
@@ -511,16 +578,18 @@ const Dashboard = () => {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1">
+
+                    {/* Actions */}
+                    <div className="flex flex-col items-center justify-center gap-1 pr-3">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => swapMeal(selectedDay, mealIndex)}
-                        disabled={swapping === `${selectedDay}-${mealIndex}`}
+                        disabled={isSwapping}
                         className="rounded-full h-8 w-8 p-0"
                         data-testid={`swap-meal-${mealIndex}`}
                       >
-                        {swapping === `${selectedDay}-${mealIndex}` ? (
+                        {isSwapping ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
                         ) : (
                           <Shuffle className="w-4 h-4" />
